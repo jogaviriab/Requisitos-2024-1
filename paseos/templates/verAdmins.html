@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <title>Ver Admins</title>
+</head>
+<body>
+    
+    {% if listaAdmins %}
+        <h1>Administradores</h1>
+        <table class="hola">
+            <tr>
+                <th>Nombre</th>
+                <th>Cedula</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+            {% for admin in listaAdmins %}
+                <tr>
+                    <td>{{ admin.nombre }}</td>
+                    <td>{{ admin.id }}</td>
+                    <td>{{ admin.email }}</td>
+                    <td>
+                        
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No hay administradores</p>
+    {% endif %}
+</body>
+</html>

@@ -1,13 +1,18 @@
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template import loader
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
+
+from datetime import datetime
 
 import base64
+from PIL import Image
+from io import BytesIO
 
 from . forms import ChivaForm
 from . forms import PaseoForm
 
-from django.contrib import messages
 
 from .models import Administrador
 from .models import Chiva
@@ -25,29 +30,42 @@ def verAdmins(request):
     }
     return HttpResponse(template.render(context, request))
 
-import base64
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Chiva, EsquemaCobro, Paseo
-
 def crearPaseo(request):
     listaChivas = Chiva.objects.all()
     if request.method == 'POST':
-        print("Entra acá")
+        # Conseguimos la chiva con la placa
+        placaChiva = request.POST.get('chiva')
+        try:
+            chiva = Chiva.objects.get(placa=placaChiva)
+        except ObjectDoesNotExist:
+            messages.error(request,"Por favor seleccione una chiva válida")
+            return render(request, 'crearPaseo.html', {'listaChivas': listaChivas})
         # Al crear un paseo primero se tiene que crear el esquema de cobro
         # Creamos esquema de cobro
         esquema = request.POST.get('esquema')
         valor = request.POST.get('valor')
-        equilibrio = request.POST.get('equilibrio')
+        fechaAumento = request.POST.get('fechaAumento')
         aumento = request.POST.get('aumento')
-        volumen = request.POST.get('volumen')
+        equilibrio = request.POST.get('equilibrio')
         descuento = request.POST.get('descuento')
 
         if esquema == "Tipo Aerolinea":
-            esquemaCobro = EsquemaCobro(tipo=esquema, fechaAumento=aumento,valorAumento=valor)
+            esquemaCobro = EsquemaCobro(tipo=esquema,valor=valor, fechaAumento=fechaAumento,valorAumento=aumento,puntoEquilibrio=-1,descuento=-1)
             esquemaCobro.save()
-        elif esquema == "Tipo Volumen":
-            esquemaCobro = EsquemaCobro(tipo=esquema, puntoEquilibrio = equilibrio, descuento=descuento)
+        elif esquema == "Por Volumen":
+                        
+            # Crear una cadena de texto con la fecha en el formato correcto
+            fecha = "2022-12-31"
+
+            # Convertir la cadena de texto en un objeto datetime
+            fecha_datetime = datetime.strptime(fecha, '%Y-%m-%d')
+
+            # Obtener solo la parte de la fecha del objeto datetime
+            fecha_date = fecha_datetime.date()
+
+            # Crear una nueva instancia de EsquemaCobro con la fecha
+            esquemaCobro = EsquemaCobro(tipo=esquema, valor=valor, puntoEquilibrio=equilibrio, descuento=descuento, fechaAumento=fecha_date, valorAumento=-1)
+            #esquemaCobro = EsquemaCobro(tipo=esquema,valor=valor, puntoEquilibrio = equilibrio, descuento=descuento,fechaAumento=datetime.strptime("0000-00-00", '%Y-%m-%d').date(),valorAumento=-1)
             esquemaCobro.save()
         else:
             messages.error(request, 'Esquema de cobro no válido')
@@ -58,8 +76,8 @@ def crearPaseo(request):
         fecha = request.POST.get('fecha')
         hora = request.POST.get('hora')
         destino = request.POST.get('destino')
-        chiva = request.POST.get('chiva')
         descripcion = request.POST.get('descripcion')
+        disponibilidad = chiva.capacidad
 
         # Leemos contenido de la imagen
         imagen = request.FILES.get('imagen')
@@ -68,12 +86,12 @@ def crearPaseo(request):
             # Convertir el contenido de la imagen a una cadena Base64
             imagen_base64 = base64.b64encode(imagenContenido).decode('utf-8')
         else:
-            imagen_base64 = None
+            imagen_base64 = "Sin imagen"
 
         paseo = Paseo(
             origen=origen, fecha=fecha, hora=hora, destino=destino,
-            chiva=chiva, descripcion=descripcion, esquemaCobro=esquemaCobro,
-            imagen=imagen_base64
+            chiva=chiva, descripcion=descripcion,esquemaCobro=esquemaCobro,
+            imagen=imagen_base64, disponibilidad=disponibilidad
         )
         paseo.save()
 
@@ -83,6 +101,14 @@ def crearPaseo(request):
     template = loader.get_template('crearPaseo.html')
     context = {
         'listaChivas': listaChivas,
+    }
+    return HttpResponse(template.render(context, request))
+
+def verPaseosAdmin(request):
+    listaPaseos =  Paseo.objects.all()
+    template = loader.get_template('verPaseosAdmin.html')
+    context = {
+        'listaPaseos': listaPaseos,
     }
     return HttpResponse(template.render(context, request))
 

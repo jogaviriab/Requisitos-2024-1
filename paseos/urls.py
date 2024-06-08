@@ -7,6 +7,7 @@ urlpatterns = [
     path('verAdmins/', views.verAdmins, name='verAdmins'),
     path('chivas/', views.chivas, name='chivas'),
     path('chivas/eliminarChiva/<str:placa>', views.eliminarChiva, name='eliminarChiva'),
+    path('verPaseosAdmin/', views.verPaseosAdmin, name='verPaseosAdmin'),
 
     
 ]

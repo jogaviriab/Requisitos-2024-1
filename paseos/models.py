@@ -32,7 +32,7 @@ class Chiva(models.Model):
 
 class EsquemaCobro(models.Model):
     tipo = models.CharField(max_length=100)
-    valor = models.IntegerField
+    valor = models.IntegerField(default=0)
     puntoEquilibrio = models.IntegerField()
     valorAumento = models.IntegerField()
     fechaAumento = models.DateField()

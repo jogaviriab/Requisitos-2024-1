@@ -15,67 +15,94 @@
 <div class="container text-center">
     <h1>Crear Paseo</h1>
     <div class="container" style="margin-top: 40px;" >
+          
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% elif message.tags == 'error' %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                    {% elif message.tags == 'warning' %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
         <div class="container text-center">
             <div class="row">
+                <form class="row g-3"  enctype="multipart/form-data">
               <div class="col text-center">
                 <h1>Imagen</h1>
                 <div class="mb-3">
                     <label for="formFile" class="form-label">Ingrese la imagen del paseo</label>
-                    <input class="form-control" type="file" id="formFile">
+                    <input class="form-control" type="file" id="formFile" name="imagen">
                   </div>
               </div>
               <div class="col">
-                <form class="row g-3">
+                <!-- form -->
                     {% csrf_token %}
                     <div class="col-md-6">
-                        <input type="text" placeholder="Origen" class="form-control" id="inputOrigen">
+                        <input type="text" placeholder="Origen" class="form-control" id="inputOrigen" name="origen">
                     </div>
                     <div class="col-md-3">
-                        <input type="date" placeholder="Fecha" class="form-control" id="inputFecha">
+                        <input type="date" placeholder="Fecha" class="form-control" id="inputFecha" name="fecha">
                     </div>            
                     <div class="col-md-3">
-                        <input type="time" placeholder="Hora" class="form-control" id="inputHora">
+                        <input type="time" placeholder="Hora" class="form-control" id="inputHora" name="hora">
                     </div>
                     <div class="col-md-6">
-                        <input type="text" placeholder="Destino" class="form-control" id="inputDestino">
+                        <input type="text" placeholder="Destino" class="form-control" id="inputDestino" name="destino">
                     </div>
                     <div class="col-md-6">
-                        <select id="inputState" class="form-select">
-                            <option selected>Chiva...</option>
-                            <option>...</option>
-                        </select>
+                        <select id="inputState" class="form-select" name="chiva">
+                            <option selected disabled>Chiva...</option>
+                            {% for chiva in listaChivas %}
+                                <option value="{{ chiva }}">{{ chiva.placa}} - {{ chiva.tipo }}</option>
+                            {% endfor %}
+                        </select>   
                     </div>
 
                     <div class="col-mb-3">
-                        <textarea class="form-control" placeholder="Descripción" id="exampleFormControlTextarea1" rows="3"></textarea>
+                        <textarea class="form-control" placeholder="Descripción" id="Descripción" name="descripcion" rows="3"></textarea>
                       </div>
 
                     <div class="col-md-6">
-                        <select id="inputEsquema" class="form-select" onchange="toggleFields()">
+                        <select id="inputEsquema" class="form-select" name="esquema" onchange="toggleFields()">
                             <option selected>Esquema...</option>
-                            <option value="tipoAerolinea">Tipo Aerolinea</option>
-                            <option value="porVolumen">Por Volumen</option>
+                            <option value="Tipo Aerolinea">Tipo Aerolinea</option>
+                            <option value="Por Volumen">Por Volumen</option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
-                        <input type="number" placeholder="Valor" class="form-control" id="inputValor">
+                        <input type="number" placeholder="Valor" class="form-control" id="inputValor" name="valor">
                     </div>
 
                     <div class="col-md-6" id="equilibrioField" style="display: none;">
-                        <input type="Date" placeholder="Punto Equilibrio" class="form-control" id="inputEquilibrio">
+                        <input type="Date" placeholder="Punto Equilibrio" class="form-control" id="inputEquilibrio" name="equilibrio" value="0">
                     </div>
 
                     <div class="col-md-6" id="aumentoField" style="display: none;">
-                        <input type="number" placeholder="Aumento" class="form-control" id="inputAumento">
+                        <input type="number" placeholder="Aumento" class="form-control" id="inputAumento" name="aumento" value="0">
                     </div>
 
                     <div class="col-md-6" id="volumenField" style="display: none;">
-                        <input type="text" placeholder="Punto Equilibrio" class="form-control" id="inputVolumen">
+                        <input type="text" placeholder="Punto Equilibrio" class="form-control" id="inputVolumen" name="volumen" value="0">
                     </div>
 
                     <div class="col-md-6" id="descuentoField" style="display: none;">
-                        <input type="number" placeholder="Descuento" class="form-control" id="inputDescuento">
+                        <input type="number" placeholder="Descuento" class="form-control" id="inputDescuento" name="descuento" value="0">
                     </div>
 
                     <script>
@@ -88,14 +115,14 @@
                             var volumenField = document.getElementById("volumenField");
                             var descuentoField = document.getElementById("descuentoField");
 
-                            if (selectedOption == "tipoAerolinea") {
+                            if (selectedOption == "Tipo Aerolinea") {
                                 console.log("tipoAerolinea");
                                 equilibrioField.style.display = "block";
                                 aumentoField.style.display = "block";
                                 volumenField.style.display = "none";
                                 descuentoField.style.display = "none";
-                            } else if (selectedOption == "porVolumen") {
-                                console.log("porVolumen");
+                            } else if (selectedOption == "Por Volumen") {
+                                console.log("porVolumen"); 
                                 equilibrioField.style.display = "none";
                                 aumentoField.style.display = "none";
                                 volumenField.style.display = "block";

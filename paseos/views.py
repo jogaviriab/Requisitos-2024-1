@@ -112,6 +112,24 @@ def verPaseosAdmin(request):
     }
     return HttpResponse(template.render(context, request))
 
+def paseoAdmin(request, id):
+    try:
+        paseo = Paseo.objects.get(pk=id)
+        chiva = Chiva.objects.get(pk=paseo.chiva.placa)
+        esquema = EsquemaCobro.objects.get(pk=paseo.esquemaCobro.id)
+        listaReservas = paseo.reserva_set.all()
+
+    except Paseo.DoesNotExist:
+        return messages.error(request,'Paseo no encontrado')
+
+    template = loader.get_template('paseoAdmin.html')
+    context = {
+        'paseo': paseo,
+        'chiva': chiva,
+        'esquema': esquema,
+        'listaReservas': listaReservas,
+    }
+    return HttpResponse(template.render(context, request))
 
 def chivas(request):
     if request.method == 'POST':

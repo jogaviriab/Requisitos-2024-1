@@ -11,17 +11,26 @@
 <body>
     {% include "navbarAdmin.html" %}
     <h1>Paseos</h1>
-    <div class="container text-center">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4">
-            {% for paseo in listaPaseos %}
-                <div class="col" style="background-color: aqua;">
-                    <img src="data:image/jpeg;base64,{{ paseo.imagen }}" alt="Imagen">
-
-                        <h1>{{ paseo.origen}}</h1>
-                        </div>
-            {% endfor %}
-
-        </div>
+    <div class="container">
+<!--         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3">
+            -->
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for paseo in listaPaseos %}
+                    <div class="col">
+                        <a  href="{% url 'paseoAdmin' paseo.id %}" style="text-decoration: none;">
+                            <div class="card" style="max-width: 400px; max-height: 415px ;">
+                                <img src="data:image/jpeg;base64,{{ paseo.imagen }}" class="card-img-top" alt="..." style="width: 100%; max-height: 230px;">
+                                <div class="card-body">
+                                    <h5 class="card-title">De {{ paseo.origen}} a {{ paseo.destino }}</h5>
+                                    <p class="card-text">Fecha: {{ paseo.fecha|date:"d b Y" }} {{ paseo.hora }}<br>
+                                        Disponibilidad: {{ paseo.disponibilidad }}<br>
+                                        {{paseo.descripcion|truncatechars:93 }}.</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %} 
+            </div>
       </div>
 </body>
 </html>

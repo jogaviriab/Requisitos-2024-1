@@ -9,6 +9,8 @@ urlpatterns = [
     path('chivas/eliminarChiva/<str:placa>', views.eliminarChiva, name='eliminarChiva'),
     path('verPaseosAdmin/', views.verPaseosAdmin, name='verPaseosAdmin'),
     path('paseoAdmin/<int:id>', views.paseoAdmin, name='paseoAdmin'),
+    path('hola/', views.hola, name='hola'),
+    
 
     
 ]

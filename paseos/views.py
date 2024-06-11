@@ -7,8 +7,7 @@ from django.contrib import messages
 from datetime import datetime
 
 import base64
-from PIL import Image
-from io import BytesIO
+
 
 from . forms import ChivaForm
 from . forms import PaseoForm
@@ -158,3 +157,12 @@ def eliminarChiva(request, placa):
     chiva.delete()
     messages.warning(request, 'Chiva eliminada con exito')
     return redirect('../')
+
+def hola(request):
+    template = loader.get_template('hola.html')
+    context = {
+        'nombre': 'Mundo'
+    }
+
+
+    return HttpResponse(template.render(context,request))

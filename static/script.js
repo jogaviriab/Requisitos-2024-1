@@ -40,15 +40,16 @@ function cargarCarrusel(url, numeroImagen){
     carrusel.removeAttribute('hidden'); //Habilitar
 
     //Quitar el activo de otra imagen
-    let imagenActiva = document.getElementsByClassName('carousel-item active');
-    if (imagenActiva.length > 0){ imagenActiva[0].setAttribute('class','carousel-item')};
+    let imagenActiva = document.getElementsByClassName('carousel-item active ms-5');
+    if (imagenActiva.length > 0){ imagenActiva[0].setAttribute('class','carousel-item ms-5')};
 
     //Verificar si ya se habia cargado imagen en el mismo input 
     let divPrevio = document.getElementById('prev'+numeroImagen);
     if (divPrevio === null){ 
         //Crear el div y la imagen nueva
         let div = document.createElement('div');
-        div.setAttribute('class', "carousel-item active");
+        div.setAttribute('class', "carousel-item active ms-5");
+        div.setAttribute('style', 'width: 70%');
         let img = document.createElement('img');
         img.setAttribute('class', 'd-block w-100 img-thumbnail');
         img.setAttribute('style', 'border: 2px solid #000000');
@@ -60,7 +61,7 @@ function cargarCarrusel(url, numeroImagen){
     } else {
         //Reemplazar foto
         divPrevio.getElementsByTagName('img')[0].setAttribute('src', url);
-        divPrevio.setAttribute('class', 'carousel-item active');
+        divPrevio.setAttribute('class', 'carousel-item active ms-5');
     }
     
     //Botones carrusel
@@ -119,11 +120,42 @@ function cambiarVistaP(numeroImagen){
 
 function seleccionarChiva(elemento, disponibilidad) {
     let opcionSeleccionada = elemento.value;
+    // let placa = opcionSeleccionada.split(' - ');
     // Hacer consulta a bd para obtener la capacidad de la chiva
 
     // Habilitar/Deshabilitar el campo de cupos
     if (opcionSeleccionada !== 'Seleccionar'){
-        document.getElementById('cupos').removeAttribute('hidden');
+        // document.getElementById('cupos').removeAttribute('hidden');
+        // //Debemos conectarnos a la bd para conocer la capacidad de la chiva seleccionada
+        // const sqlite3 = require('sqlite3').verbose();
+        // // Conectarse a la base de datos
+        // const db = new sqlite3.Database('/db.sqlite3', sqlite3.OPEN_READWRITE, (err) => {
+        // if (err) {    
+        //     console.error(err.message);
+        // }
+        // console.log('Conectado a la base de datos SQLite.');                            
+        // });
+
+        // // Realizar consulta
+        // const sql = 'SELECT * FROM paseos_chiva WHERE placa = ? ';
+
+        // db.all(sql, [placa], (err, rows) => {
+        // if (err) {
+        //     throw err;
+        // }
+        // rows.forEach((row) => {
+        //     console.log(row);
+        // });
+        // });
+
+        // // Cerrar la conexión con la base de datos
+        // db.close((err) => {
+        // if (err) {
+        //     console.error(err.message);
+        // }
+        // console.log('Conexión a la base de datos cerrada.');
+        // });
+
         document.getElementById('valorCupos').value = disponibilidad;
         document.getElementById('valorCupos').removeAttribute('hidden');
 

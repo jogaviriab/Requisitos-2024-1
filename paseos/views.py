@@ -30,14 +30,16 @@ def verAdmins(request):
     return HttpResponse(template.render(context, request))
 
 def registrarPaseo(request):
-    listaChivas = Chiva.objects.all()
+
+    listaChivas = Chiva.objects.filter(estado='Disponible')
+
     if request.method == 'POST':
         # Conseguimos la chiva con la placa
         placaChiva = request.POST.get('chiva')
         try:
             chiva = Chiva.objects.get(placa=placaChiva)
         except ObjectDoesNotExist:
-            messages.error(request,"Por favor seleccione una chiva válida")
+            messages.error(request,"Por favor seleccione una chiva válida.")
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
         # Al crear un paseo primero se tiene que crear el esquema de cobro
         # Creamos esquema de cobro
@@ -111,9 +113,12 @@ def registrarPaseo(request):
             chiva=chiva, descripcion=descripcion,esquemaCobro=esquemaCobro,
             imagen=imagen_base64, disponibilidad=disponibilidad
         )
-        paseo.save()
 
+        paseo.save()
         messages.success(request, 'Paseo registrado con éxito.')
+        # Actualizamos el estado de la chiva escogida
+        chiva.estado = 'No Disponible'
+        chiva.save()
         return redirect('./')  # Redirigir a la página adecuada después de guardar
 
     template = loader.get_template('registrarPaseo.html')

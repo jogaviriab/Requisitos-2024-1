@@ -29,7 +29,7 @@ def verAdmins(request):
     }
     return HttpResponse(template.render(context, request))
 
-def crearPaseo(request):
+def registrarPaseo(request):
     listaChivas = Chiva.objects.all()
     if request.method == 'POST':
         # Conseguimos la chiva con la placa
@@ -38,7 +38,7 @@ def crearPaseo(request):
             chiva = Chiva.objects.get(placa=placaChiva)
         except ObjectDoesNotExist:
             messages.error(request,"Por favor seleccione una chiva válida")
-            return render(request, 'crearPaseo.html', {'listaChivas': listaChivas})
+            return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
         # Al crear un paseo primero se tiene que crear el esquema de cobro
         # Creamos esquema de cobro
         esquema = request.POST.get('esquema')
@@ -48,10 +48,10 @@ def crearPaseo(request):
         equilibrio = request.POST.get('equilibrio')
         descuento = request.POST.get('descuento')
 
-        if esquema == "Tipo Aerolinea":
+        if esquema == "Aerolínea":
             esquemaCobro = EsquemaCobro(tipo=esquema,valor=valor, fechaAumento=fechaAumento,valorAumento=aumento,puntoEquilibrio=-1,descuento=-1)
             esquemaCobro.save()
-        elif esquema == "Por Volumen":
+        elif esquema == "Volumen":
                         
             # Crear una cadena de texto con la fecha en el formato correcto
             fecha = "2022-12-31"
@@ -68,7 +68,7 @@ def crearPaseo(request):
             esquemaCobro.save()
         else:
             messages.error(request, 'Esquema de cobro no válido')
-            return render(request, 'crearPaseo.html', {'listaChivas': listaChivas})
+            return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
 
         # Creamos el paseo
         origen = request.POST.get('origen')
@@ -78,14 +78,33 @@ def crearPaseo(request):
         descripcion = request.POST.get('descripcion')
         disponibilidad = chiva.capacidad
 
-        # Leemos contenido de la imagen
-        imagen = request.FILES.get('imagen')
-        if imagen:
-            imagenContenido = imagen.read()
+        # Leemos contenido de las imagenes
+        imagen1 = request.FILES.get('imagen1')
+        imagen2 = request.FILES.get('imagen2')
+        imagen3 = request.FILES.get('imagen3')
+        imagen_base64 = ''
+
+        if not(imagen1) and not(imagen2) and not(imagen3):
+            messages.error(request, 'Debes subir al menos una imagen.')
+            return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
+
+        if imagen1:
+            imagenContenido = imagen1.read()
             # Convertir el contenido de la imagen a una cadena Base64
-            imagen_base64 = base64.b64encode(imagenContenido).decode('utf-8')
-        else:
-            imagen_base64 = "Sin imagen"
+            imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
+            imagen_base64 += "-"
+        
+        if imagen2:
+            imagenContenido = imagen2.read()
+            # Convertir el contenido de la imagen a una cadena Base64
+            imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
+            imagen_base64 += "-"
+        
+        if imagen3:
+            imagenContenido = imagen2.read()
+            # Convertir el contenido de la imagen a una cadena Base64
+            imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
+            imagen_base64 += "-"
 
         paseo = Paseo(
             origen=origen, fecha=fecha, hora=hora, destino=destino,
@@ -94,10 +113,10 @@ def crearPaseo(request):
         )
         paseo.save()
 
-        messages.success(request, 'Paseo guardado con éxito')
+        messages.success(request, 'Paseo registrado con éxito.')
         return redirect('./')  # Redirigir a la página adecuada después de guardar
 
-    template = loader.get_template('crearPaseo.html')
+    template = loader.get_template('registrarPaseo.html')
     context = {
         'listaChivas': listaChivas,
     }

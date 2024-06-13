@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <title>Registro de un paseo</title>
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">  
+</head>
+<body>
+
+    <!-- Barra de navegacion -->
+    <header>
+        {% include "navbarAdmin.html" %}
+    </header>
+
+    <!-- Titulo -->
+    <br>
+      <p class="fs-2 fw-bold text-center">Registro de un paseo nuevo</p>
+    </br>
+    
+    <!-- Alertas -->
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                {% if message.tags == 'success' %} 
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% elif message.tags == 'error' %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                {% elif message.tags == 'warning' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    <!-- Formulario -->
+    <div class="row">
+
+        <!-- Imagenes del paseo -->
+        <div id="carouselExampleIndicators" class="carousel slide col ms-3">
+          
+          <!-- Carrusel de fotos -->
+          <div class="carousel-inner mt-5" id="carrusel" hidden>
+          </div>
+  
+          <!-- Imagen inicial- Sin imágenes subidas -->
+          <div class="card ms-5 mt-5" id="noImagen">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 5H4V19L13.2923 9.70649C13.6828 9.31595 14.3159 9.31591 14.7065 9.70641L20 15.0104V5ZM2 3.9934C2 3.44476 2.45531 3 2.9918 3H21.0082C21.556 3 22 3.44495 22 3.9934V20.0066C22 20.5552 21.5447 21 21.0082 21H2.9918C2.44405 21 2 20.5551 2 20.0066V3.9934ZM8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7C9.10457 7 10 7.89543 10 9C10 10.1046 9.10457 11 8 11Z"></path></svg>
+            <div class="card__content">
+              <p class="card__title">Imágenes del paseo</p>
+              <p class="card__description">Aqui podrás visualizar las imágenes que cargues del paseo. Sube al menos una.</p>
+            </div>
+          </div>
+          
+          <!-- Botones del carrusel -->
+          <div class="btn-conteiner mt-3">
+            <div class="me-5">
+              <a class="btn-content" id="botonPrev" data-bs-slide="prev" data-bs-target="#carouselExampleIndicators" style="transform: scaleX(-1);" hidden>
+                <span class="icon-arrow">
+                  <svg
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    xmlns="http://www.w3.org/2000/svg"
+                    version="1.1"
+                    viewBox="0 0 66 43"
+                    height="30px"
+                    width="30px"
+                  >
+                    <g
+                      fill-rule="evenodd"
+                      fill="none"
+                      stroke-width="1"
+                      stroke="none"
+                      id="arrow"
+                    >
+                      <path
+                        fill="#9ee5fa"
+                        d="M40.1543933,3.89485454 L43.9763149,0.139296592 C44.1708311,-0.0518420739 44.4826329,-0.0518571125 44.6771675,0.139262789 L65.6916134,20.7848311 C66.0855801,21.1718824 66.0911863,21.8050225 65.704135,22.1989893 C65.7000188,22.2031791 65.6958657,22.2073326 65.6916762,22.2114492 L44.677098,42.8607841 C44.4825957,43.0519059 44.1708242,43.0519358 43.9762853,42.8608513 L40.1545186,39.1069479 C39.9575152,38.9134427 39.9546793,38.5968729 40.1481845,38.3998695 C40.1502893,38.3977268 40.1524132,38.395603 40.1545562,38.3934985 L56.9937789,21.8567812 C57.1908028,21.6632968 57.193672,21.3467273 57.0001876,21.1497035 C56.9980647,21.1475418 56.9959223,21.1453995 56.9937605,21.1432767 L40.1545208,4.60825197 C39.9574869,4.41477773 39.9546013,4.09820839 40.1480756,3.90117456 C40.1501626,3.89904911 40.1522686,3.89694235 40.1543933,3.89485454 Z"
+                        id="arrow-icon-one"
+                      ></path>
+                      <path
+                        fill="#9ee5fa"
+                        d="M20.1543933,3.89485454 L23.9763149,0.139296592 C24.1708311,-0.0518420739 24.4826329,-0.0518571125 24.6771675,0.139262789 L45.6916134,20.7848311 C46.0855801,21.1718824 46.0911863,21.8050225 45.704135,22.1989893 C45.7000188,22.2031791 45.6958657,22.2073326 45.6916762,22.2114492 L24.677098,42.8607841 C24.4825957,43.0519059 24.1708242,43.0519358 23.9762853,42.8608513 L20.1545186,39.1069479 C19.9575152,38.9134427 19.9546793,38.5968729 20.1481845,38.3998695 C20.1502893,38.3977268 20.1524132,38.395603 20.1545562,38.3934985 L36.9937789,21.8567812 C37.1908028,21.6632968 37.193672,21.3467273 37.0001876,21.1497035 C36.9980647,21.1475418 36.9959223,21.1453995 36.9937605,21.1432767 L20.1545208,4.60825197 C19.9574869,4.41477773 19.9546013,4.09820839 20.1480756,3.90117456 C20.1501626,3.89904911 20.1522686,3.89694235 20.1543933,3.89485454 Z"
+                        id="arrow-icon-two"
+                      ></path>
+                      <path
+                        fill="#9ee5fa"
+                        d="M0.154393339,3.89485454 L3.97631488,0.139296592 C4.17083111,-0.0518420739 4.48263286,-0.0518571125 4.67716753,0.139262789 L25.6916134,20.7848311 C26.0855801,21.1718824 26.0911863,21.8050225 25.704135,22.1989893 C25.7000188,22.2031791 25.6958657,22.2073326 25.6916762,22.2114492 L4.67709797,42.8607841 C4.48259567,43.0519059 4.17082418,43.0519358 3.97628526,42.8608513 L0.154518591,39.1069479 C-0.0424848215,38.9134427 -0.0453206733,38.5968729 0.148184538,38.3998695 C0.150289256,38.3977268 0.152413239,38.395603 0.154556228,38.3934985 L16.9937789,21.8567812 C17.1908028,21.6632968 17.193672,21.3467273 17.0001876,21.1497035 C16.9980647,21.1475418 16.9959223,21.1453995 16.9937605,21.1432767 L0.15452076,4.60825197 C-0.0425130651,4.41477773 -0.0453986756,4.09820839 0.148075568,3.90117456 C0.150162624,3.89904911 0.152268631,3.89694235 0.154393339,3.89485454 Z"
+                        id="arrow-icon-three"
+                      ></path>
+                    </g>
+                  </svg>
+                </span>
+              </a>
+            </div>
+           
+            <div class="ms-5">
+              <a class="btn-content" id="botonNext" data-bs-slide="next" data-bs-target="#carouselExampleIndicators" hidden>
+                <span class="icon-arrow">
+                  <svg
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    xmlns="http://www.w3.org/2000/svg"
+                    version="1.1"
+                    viewBox="0 0 66 43"
+                    height="30px"
+                    width="30px"
+                  >
+                    <g
+                      fill-rule="evenodd"
+                      fill="none"
+                      stroke-width="1"
+                      stroke="none"
+                      id="arrow"
+                    >
+                      <path
+                        fill="#9ee5fa"
+                        d="M40.1543933,3.89485454 L43.9763149,0.139296592 C44.1708311,-0.0518420739 44.4826329,-0.0518571125 44.6771675,0.139262789 L65.6916134,20.7848311 C66.0855801,21.1718824 66.0911863,21.8050225 65.704135,22.1989893 C65.7000188,22.2031791 65.6958657,22.2073326 65.6916762,22.2114492 L44.677098,42.8607841 C44.4825957,43.0519059 44.1708242,43.0519358 43.9762853,42.8608513 L40.1545186,39.1069479 C39.9575152,38.9134427 39.9546793,38.5968729 40.1481845,38.3998695 C40.1502893,38.3977268 40.1524132,38.395603 40.1545562,38.3934985 L56.9937789,21.8567812 C57.1908028,21.6632968 57.193672,21.3467273 57.0001876,21.1497035 C56.9980647,21.1475418 56.9959223,21.1453995 56.9937605,21.1432767 L40.1545208,4.60825197 C39.9574869,4.41477773 39.9546013,4.09820839 40.1480756,3.90117456 C40.1501626,3.89904911 40.1522686,3.89694235 40.1543933,3.89485454 Z"
+                        id="arrow-icon-one"
+                      ></path>
+                      <path
+                        fill="#9ee5fa"
+                        d="M20.1543933,3.89485454 L23.9763149,0.139296592 C24.1708311,-0.0518420739 24.4826329,-0.0518571125 24.6771675,0.139262789 L45.6916134,20.7848311 C46.0855801,21.1718824 46.0911863,21.8050225 45.704135,22.1989893 C45.7000188,22.2031791 45.6958657,22.2073326 45.6916762,22.2114492 L24.677098,42.8607841 C24.4825957,43.0519059 24.1708242,43.0519358 23.9762853,42.8608513 L20.1545186,39.1069479 C19.9575152,38.9134427 19.9546793,38.5968729 20.1481845,38.3998695 C20.1502893,38.3977268 20.1524132,38.395603 20.1545562,38.3934985 L36.9937789,21.8567812 C37.1908028,21.6632968 37.193672,21.3467273 37.0001876,21.1497035 C36.9980647,21.1475418 36.9959223,21.1453995 36.9937605,21.1432767 L20.1545208,4.60825197 C19.9574869,4.41477773 19.9546013,4.09820839 20.1480756,3.90117456 C20.1501626,3.89904911 20.1522686,3.89694235 20.1543933,3.89485454 Z"
+                        id="arrow-icon-two"
+                      ></path>
+                      <path
+                        fill="#9ee5fa"
+                        d="M0.154393339,3.89485454 L3.97631488,0.139296592 C4.17083111,-0.0518420739 4.48263286,-0.0518571125 4.67716753,0.139262789 L25.6916134,20.7848311 C26.0855801,21.1718824 26.0911863,21.8050225 25.704135,22.1989893 C25.7000188,22.2031791 25.6958657,22.2073326 25.6916762,22.2114492 L4.67709797,42.8607841 C4.48259567,43.0519059 4.17082418,43.0519358 3.97628526,42.8608513 L0.154518591,39.1069479 C-0.0424848215,38.9134427 -0.0453206733,38.5968729 0.148184538,38.3998695 C0.150289256,38.3977268 0.152413239,38.395603 0.154556228,38.3934985 L16.9937789,21.8567812 C17.1908028,21.6632968 17.193672,21.3467273 17.0001876,21.1497035 C16.9980647,21.1475418 16.9959223,21.1453995 16.9937605,21.1432767 L0.15452076,4.60825197 C-0.0425130651,4.41477773 -0.0453986756,4.09820839 0.148075568,3.90117456 C0.150162624,3.89904911 0.152268631,3.89694235 0.154393339,3.89485454 Z"
+                        id="arrow-icon-three"
+                      ></path>
+                    </g>
+                  </svg>
+                </span>
+              </a>
+            </div> 
+          </div>
+        </div>
+  
+        <!-- Datos paseo -->
+        <form class="me-3 col" method="POST" enctype="multipart/form-data"> 
+        {% csrf_token %}
+  
+          <br>
+            <p class="fs-5 fw-bold">Información general del paseo</p>
+    
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-default">Origen</span>
+              <input name='origen' type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+          
+              <span class="input-group-text" id="inputGroup-sizing-default">Fecha</span>
+              <input name='fecha' type="date" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+    
+              <span class="input-group-text" id="inputGroup-sizing-default">Chiva</span>
+              <select name="chiva" id="chivasDisponibles" class="form-select" onchange="seleccionarChiva(this)">
+                <option selected>Seleccionar</option>
+                {% for chiva in listaChivas %}
+                    <option value="{{ chiva.placa }}">{{ chiva.placa}} - {{ chiva.tipo }}</option>
+                {% endfor %}
+              </select>
+            </div>
+              
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-default">Destino</span>
+              <input name='destino' type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                
+              <span class="input-group-text" id="inputGroup-sizing-default">Hora</span>
+              <input name='hora' type="time" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                
+              <span class="input-group-text" id="cupos" hidden>Cupos</span>
+              <input  class="form-control" id="valorCupos" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" aria-disabled="false" disabled hidden>
+            </div>
+      
+            <div class="input-group">
+              <span class="input-group-text">Descripción</span>
+              <textarea name='descripcion' class="form-control" aria-label="With textarea" required></textarea>
+            </div>
+          </br>
+          
+          <br>
+            <p class="fs-5 fw-bold">Esquema de cobro</p>
+    
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-default">Tipo costo</span>
+              <select name="esquema" id="inputState" class="form-select" onchange="seleccionarEsquema(this)">
+                <option selected>Seleccionar</option>
+                <option>Aerolínea</option>
+                <option>Volumen</option>
+              </select>
+                
+              <span class="input-group-text" id="inputGroup-sizing-default">Valor</span>
+              <input name='valor' type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+            </div>
+  
+            <div class="input-group mb-3">
+              <span class="input-group-text" id="esquema" hidden>Punto Equilibrio</span>
+              <input name='equilibrio' type="number" class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" hidden required>
+      
+              <span class="input-group-text" id="esquema2" hidden>Descuento</span>
+              <input name='descuento' type="number" class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default" hidden required>
+            </div>
+          </br>
+  
+          <!-- Cargar imagenes -->
+          <br>
+            <p class="fs-5 fw-bold">Imágenes del paseo</p>
+            <div class="mb-3">
+              <label for="formFileMultiple" class="form-label">A continuación puedes cargar las imágenes del paseo (min 1 - máx 3).</label>
+              <label for="formFileMultiple" class="form-label">Formatos: .png, .jpg, .avif, .jpeg</label>
+  
+              <div class="row">
+                <input class="form-control ms-2" name='imagen1' id='imagen1' type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
+                <button type='button' class="button ms-3" id="papelera1" onclick="eliminarImagen(this)" hidden>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 69 14"
+                    class="svgIcon bin-top"
+                  >
+                    <g clip-path="url(#clip0_35_24)">
+                      <path
+                        fill="black"
+                        d="M20.8232 2.62734L19.9948 4.21304C19.8224 4.54309 19.4808 4.75 19.1085 4.75H4.92857C2.20246 4.75 0 6.87266 0 9.5C0 12.1273 2.20246 14.25 4.92857 14.25H64.0714C66.7975 14.25 69 12.1273 69 9.5C69 6.87266 66.7975 4.75 64.0714 4.75H49.8915C49.5192 4.75 49.1776 4.54309 49.0052 4.21305L48.1768 2.62734C47.3451 1.00938 45.6355 0 43.7719 0H25.2281C23.3645 0 21.6549 1.00938 20.8232 2.62734ZM64.0023 20.0648C64.0397 19.4882 63.5822 19 63.0044 19H5.99556C5.4178 19 4.96025 19.4882 4.99766 20.0648L8.19375 69.3203C8.44018 73.0758 11.6746 76 15.5712 76H53.4288C57.3254 76 60.5598 73.0758 60.8062 69.3203L64.0023 20.0648Z"
+                      ></path>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_35_24">
+                        <rect fill="white" height="14" width="69"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 69 57"
+                    class="svgIcon bin-bottom"
+                  >
+                    <g clip-path="url(#clip0_35_22)">
+                      <path
+                        fill="black"
+                        d="M20.8232 -16.3727L19.9948 -14.787C19.8224 -14.4569 19.4808 -14.25 19.1085 -14.25H4.92857C2.20246 -14.25 0 -12.1273 0 -9.5C0 -6.8727 2.20246 -4.75 4.92857 -4.75H64.0714C66.7975 -4.75 69 -6.8727 69 -9.5C69 -12.1273 66.7975 -14.25 64.0714 -14.25H49.8915C49.5192 -14.25 49.1776 -14.4569 49.0052 -14.787L48.1768 -16.3727C47.3451 -17.9906 45.6355 -19 43.7719 -19H25.2281C23.3645 -19 21.6549 -17.9906 20.8232 -16.3727ZM64.0023 1.0648C64.0397 0.4882 63.5822 0 63.0044 0H5.99556C5.4178 0 4.96025 0.4882 4.99766 1.0648L8.19375 50.3203C8.44018 54.0758 11.6746 57 15.5712 57H53.4288C57.3254 57 60.5598 54.0758 60.8062 50.3203L64.0023 1.0648Z"
+                      ></path>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_35_22">
+                        <rect fill="white" height="57" width="69"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </button>
+              </div>
+  
+              <div class="row">
+                <input class="form-control ms-2" name='imagen2' id="imagen2" type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
+                <button type='button'  class="button ms-3" id="papelera2" onclick="eliminarImagen(this)" hidden>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 69 14"
+                    class="svgIcon bin-top"
+                  >
+                    <g clip-path="url(#clip0_35_24)">
+                      <path
+                        fill="black"
+                        d="M20.8232 2.62734L19.9948 4.21304C19.8224 4.54309 19.4808 4.75 19.1085 4.75H4.92857C2.20246 4.75 0 6.87266 0 9.5C0 12.1273 2.20246 14.25 4.92857 14.25H64.0714C66.7975 14.25 69 12.1273 69 9.5C69 6.87266 66.7975 4.75 64.0714 4.75H49.8915C49.5192 4.75 49.1776 4.54309 49.0052 4.21305L48.1768 2.62734C47.3451 1.00938 45.6355 0 43.7719 0H25.2281C23.3645 0 21.6549 1.00938 20.8232 2.62734ZM64.0023 20.0648C64.0397 19.4882 63.5822 19 63.0044 19H5.99556C5.4178 19 4.96025 19.4882 4.99766 20.0648L8.19375 69.3203C8.44018 73.0758 11.6746 76 15.5712 76H53.4288C57.3254 76 60.5598 73.0758 60.8062 69.3203L64.0023 20.0648Z"
+                      ></path>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_35_24">
+                        <rect fill="white" height="14" width="69"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 69 57"
+                    class="svgIcon bin-bottom"
+                  >
+                    <g clip-path="url(#clip0_35_22)">
+                      <path
+                        fill="black"
+                        d="M20.8232 -16.3727L19.9948 -14.787C19.8224 -14.4569 19.4808 -14.25 19.1085 -14.25H4.92857C2.20246 -14.25 0 -12.1273 0 -9.5C0 -6.8727 2.20246 -4.75 4.92857 -4.75H64.0714C66.7975 -4.75 69 -6.8727 69 -9.5C69 -12.1273 66.7975 -14.25 64.0714 -14.25H49.8915C49.5192 -14.25 49.1776 -14.4569 49.0052 -14.787L48.1768 -16.3727C47.3451 -17.9906 45.6355 -19 43.7719 -19H25.2281C23.3645 -19 21.6549 -17.9906 20.8232 -16.3727ZM64.0023 1.0648C64.0397 0.4882 63.5822 0 63.0044 0H5.99556C5.4178 0 4.96025 0.4882 4.99766 1.0648L8.19375 50.3203C8.44018 54.0758 11.6746 57 15.5712 57H53.4288C57.3254 57 60.5598 54.0758 60.8062 50.3203L64.0023 1.0648Z"
+                      ></path>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_35_22">
+                        <rect fill="white" height="57" width="69"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </button>
+              </div>
+  
+              <div class="row">
+                <input class="form-control ms-2" name='imagen3' id="imagen3" type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
+                <button type='button' class="button ms-3" id="papelera3" onclick="eliminarImagen(this)" hidden>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 69 14"
+                    class="svgIcon bin-top"
+                  >
+                    <g clip-path="url(#clip0_35_24)">
+                      <path
+                        fill="black"
+                        d="M20.8232 2.62734L19.9948 4.21304C19.8224 4.54309 19.4808 4.75 19.1085 4.75H4.92857C2.20246 4.75 0 6.87266 0 9.5C0 12.1273 2.20246 14.25 4.92857 14.25H64.0714C66.7975 14.25 69 12.1273 69 9.5C69 6.87266 66.7975 4.75 64.0714 4.75H49.8915C49.5192 4.75 49.1776 4.54309 49.0052 4.21305L48.1768 2.62734C47.3451 1.00938 45.6355 0 43.7719 0H25.2281C23.3645 0 21.6549 1.00938 20.8232 2.62734ZM64.0023 20.0648C64.0397 19.4882 63.5822 19 63.0044 19H5.99556C5.4178 19 4.96025 19.4882 4.99766 20.0648L8.19375 69.3203C8.44018 73.0758 11.6746 76 15.5712 76H53.4288C57.3254 76 60.5598 73.0758 60.8062 69.3203L64.0023 20.0648Z"
+                      ></path>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_35_24">
+                        <rect fill="white" height="14" width="69"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 69 57"
+                    class="svgIcon bin-bottom"
+                  >
+                    <g clip-path="url(#clip0_35_22)">
+                      <path
+                        fill="black"
+                        d="M20.8232 -16.3727L19.9948 -14.787C19.8224 -14.4569 19.4808 -14.25 19.1085 -14.25H4.92857C2.20246 -14.25 0 -12.1273 0 -9.5C0 -6.8727 2.20246 -4.75 4.92857 -4.75H64.0714C66.7975 -4.75 69 -6.8727 69 -9.5C69 -12.1273 66.7975 -14.25 64.0714 -14.25H49.8915C49.5192 -14.25 49.1776 -14.4569 49.0052 -14.787L48.1768 -16.3727C47.3451 -17.9906 45.6355 -19 43.7719 -19H25.2281C23.3645 -19 21.6549 -17.9906 20.8232 -16.3727ZM64.0023 1.0648C64.0397 0.4882 63.5822 0 63.0044 0H5.99556C5.4178 0 4.96025 0.4882 4.99766 1.0648L8.19375 50.3203C8.44018 54.0758 11.6746 57 15.5712 57H53.4288C57.3254 57 60.5598 54.0758 60.8062 50.3203L64.0023 1.0648Z"
+                      ></path>
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_35_22">
+                        <rect fill="white" height="57" width="69"></rect>
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </br>
+  
+          <!-- Botones de confirmar/cancelar -->
+          <button type="submit" class="btn btn-success">Registrar</button>
+          <button type="button" class="btn btn-danger">Cancelar</button>
+        </form>
+      </div>
+    
+      <script src="/static/script.js"></script>
+
+    
+<!-- <div class="container">
+    <h1 class="text-center">Crear Paseo</h1>
+    <div class="container" style="margin-top: 40px;" >
+          
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% elif message.tags == 'error' %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                    {% elif message.tags == 'warning' %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <div class="container">
+            <form  method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    
+                    <div class="col-sm-6 text-center">
+                        <h1>Imagen</h1>
+                        <div class="mb-3">
+                            <label for="formFile" class="form-label">Ingrese la imagen del paseo</label>
+                            <input class="form-control" type="file" id="formFile" name="imagen">
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6" >
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col-sm-6">
+                                <label for="inputOrigen" class="form-label">Origen</label>
+                                <input type="text"  class="form-control" id="inputOrigen" name="origen">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="inputDestino" class="form-label">Destino</label>
+                                <input type="text"  class="form-control" id="inputDestino" name="destino">
+                            </div>
+                           
+                        </div>
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col-sm-4">
+                                <label for="inputFecha" class="form-label">Fecha</label>
+                                <input type="date" placeholder="Fecha" class="form-control" id="inputFecha" name="fecha">
+                            </div>            
+                            <div class="col-sm-4">
+                                <label for="inputHora" class="form-label">Hora</label>
+
+                                <input type="time" placeholder="Hora" class="form-control" id="inputHora" name="hora">
+                            </div>
+
+                            <div class="col-sm-4">
+                                <label for="inputChiva" class="form-label">Chiva</label>
+                                <select id="inputState" class="form-select" name="chiva">
+                                    <option selected disabled>Chiva...</option>
+                                    {% for chiva in listaChivas %}
+                                        <option value="{{ chiva.placa }}">{{ chiva.placa}} - {{ chiva.tipo }}</option>
+                                    {% endfor %}
+                                </select>   
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col-mb-12">
+                                <label for="inputDescripcion" class="form-label">Descripción</label>
+
+                                <textarea class="form-control" id="Descripción" name="descripcion" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col-md-6">
+                                <label for="inputEsquema" class="form-label">Esquema de Cobro</label>
+                                <select id="inputEsquema" class="form-select" name="esquema" onchange="toggleFields()">
+                                    <option selected>Esquema...</option>
+                                    <option value="Tipo Aerolinea">Tipo Aerolinea</option>
+                                    <option value="Por Volumen">Por Volumen</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="inputValor" class="form-label">Valor</label>
+                                <input type="number" class="form-control" id="inputValor" name="valor">
+                            </div>
+                        </div>
+                            <div class="row" >
+                                <div class="col-md-6" id="fechaAumentoField" style="display: none;">
+                                    <label for="inputFechaAumento" class="form-label">Fecha Aumento</label>
+                                    <input type="Date" class="form-control" id="inputFechaAumento" name="fechaAumento" >
+                                </div>
+
+                                <div class="col-md-6" id="aumentoField" style="display: none;">
+                                    <label for="inputAumento" class="form-label">Cantidad a Aumentar</label>
+                                    <input type="number" placeholder="Aumento" class="form-control" id="inputAumento" name="aumento">
+                                </div>
+                            </div>
+                            <div class="row" style="margin-bottom: 20px;" id="divEquilibrio">
+                                <div class="col-md-6" id="equilibrioField" style="display: none;">
+                                    <label for="inputEquilibrio" class="form-label">Punto Equilibrio</label>
+
+                                    <div class="input-group">
+                                
+                                    <input type="text" class="form-control" id="inputEquilibrio" name="equilibrio" max="30">
+                                    <div class="input-group-text">Maximo 30</div>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" id="descuentoField" style="display: none;">
+                                <label for="inputAumento" class="form-label">Cantidad a Descontar</label>
+                                    <input type="number" placeholder="Descuento" class="form-control" id="inputDescuento" name="descuento">
+                                </div>
+                            </div> -->
+                            <!-- <script>
+                                function toggleFields() {
+                                    console.log("toggleFields");
+                                    var selectedOption = document.getElementById("inputEsquema").value;
+                                    console.log(selectedOption);
+                                    var fechaAumentoField = document.getElementById("fechaAumentoField");
+                                    var aumentoField = document.getElementById("aumentoField");
+                                    var equilibrioField = document.getElementById("equilibrioField");
+                                    var descuentoField = document.getElementById("descuentoField");
+
+                                    if (selectedOption == "Tipo Aerolinea") {
+                                        console.log("tipoAerolinea");
+                                        fechaAumentoField.style.display = "block";
+                                        aumentoField.style.display = "block";
+                                        equilibrioField.style.display = "none";
+                                        descuentoField.style.display = "none";
+                                    } else if (selectedOption == "Por Volumen") {
+                                        console.log("porVolumen"); 
+                                        fechaAumentoField.style.display = "none";
+                                        aumentoField.style.display = "none";
+                                        equilibrioField.style.display = "block";
+                                        descuentoField.style.display = "block";
+                                    } else {
+                                        console.log("default");
+                                        fechaAumentoField.style.display = "none";
+                                        aumentoField.style.display = "none";
+                                        equilibrioField.style.display = "none";
+                                        descuentoField.style.display = "none";
+                                    }
+                                }
+                            </script> -->
+                    <!-- </div>
+                </div>
+            </form> -->
+        <!-- </div> -->
+    <!-- </div> -->
+        
+<!-- </div> -->
+    
+</body>
+</html>

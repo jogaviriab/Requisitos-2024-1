@@ -3,14 +3,10 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('crearPaseo/', views.crearPaseo, name='crearPaseo'),
+    path('registrarPaseo/', views.registrarPaseo, name='registrarPaseo'),
     path('verAdmins/', views.verAdmins, name='verAdmins'),
     path('chivas/', views.chivas, name='chivas'),
     path('chivas/eliminarChiva/<str:placa>', views.eliminarChiva, name='eliminarChiva'),
     path('verPaseosAdmin/', views.verPaseosAdmin, name='verPaseosAdmin'),
-    path('paseoAdmin/<int:id>', views.paseoAdmin, name='paseoAdmin'),
-    path('hola/', views.hola, name='hola'),
-    
-
-    
+    path('paseoAdmin/<int:id>', views.paseoAdmin, name='paseoAdmin'),      
 ]

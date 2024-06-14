@@ -63,4 +63,3 @@ class Reserva(models.Model):
     comprobantePago = models.CharField(max_length=200)
     persona = models.ForeignKey(Cliente, on_delete=models.CASCADE)
 
-

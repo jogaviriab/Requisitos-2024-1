@@ -29,6 +29,12 @@ def verAdmins(request):
     }
     return HttpResponse(template.render(context, request))
 
+def inicioSesionAdmin(request):
+    template = loader.get_template('inicioSesionAdmin.html')
+    context = {}
+
+    return HttpResponse(template.render(context, request))
+
 def registrarPaseo(request):
 
     listaChivas = Chiva.objects.filter(estado='Disponible')

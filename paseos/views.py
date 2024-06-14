@@ -4,7 +4,7 @@ from django.template import loader
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import base64
 
@@ -39,28 +39,63 @@ def registrarPaseo(request):
 
     listaChivas = Chiva.objects.filter(estado='Disponible')
 
+    # Cuando se envia los datos del formulario
     if request.method == 'POST':
-        # Conseguimos la chiva con la placa
+
+        # Conseguimos la chiva con la placa y comprobamos que exista
         placaChiva = request.POST.get('chiva')
         try:
             chiva = Chiva.objects.get(placa=placaChiva)
         except ObjectDoesNotExist:
             messages.error(request,"Por favor seleccione una chiva válida.")
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
-        # Al crear un paseo primero se tiene que crear el esquema de cobro
-        # Creamos esquema de cobro
+
+        # Algunos datos del paseo
+        origen = request.POST.get('origen')
+        destino = request.POST.get('destino')
+        descripcion = request.POST.get('descripcion')
+        disponibilidad = chiva.capacidad
+        fecha = request.POST.get('fecha')
+        hora = request.POST.get('hora')
         esquema = request.POST.get('esquema')
         valor = request.POST.get('valor')
-        fechaAumento = request.POST.get('fechaAumento')
-        aumento = request.POST.get('aumento')
-        equilibrio = request.POST.get('equilibrio')
-        descuento = request.POST.get('descuento')
 
+        # Comprobaciones de fecha
+        fecha_actual = datetime.now()
+        fecha_formato = datetime.strptime(fecha,'%Y-%m-%d').date() 
+        hora_formato = datetime.strptime(hora, '%H:%M'). time()
+        if (fecha_formato < fecha_actual.date()): # Fecha menor a la actual
+            messages.error(request, 'Fecha del paseo no válida.')
+            return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
+        elif (fecha_formato < fecha_actual.date() + timedelta(2)): # Faltan menos de dos días para la fecha del paseo
+            messages.error(request, 'Fecha del paseo no válida. Debes registrar un paseo nuevo con al menos dos días de anticipación.')
+            return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
+        elif (fecha_formato == fecha_actual.date() + timedelta(2)): # Faltan exactamente dos días, se comprueba la hora
+            if (hora_formato < fecha_actual.time()): #Hora menor a la actual, faltan menos de dos días
+                messages.error(request, 'Fecha del paseo no válida. Debes registrar un paseo nuevo con al menos dos días de anticipación. Ten en cuenta la hora del paseo.')
+                return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
+
+        # Al crear un paseo primero se tiene que crear el esquema de cobro
+        # Creamos esquema de cobro
         if esquema == "Aerolínea":
+            fechaAumento = request.POST.get('fechaAumento')
+            fechaAumento_formato  = datetime.strptime(fechaAumento, '%Y-%m-%d').date() 
+
+            # Comprobaciones fecha de aumento
+            if (fechaAumento_formato < fecha_actual.date()): # Fecha de aumento menor a la actual
+                messages.error(request, 'Fecha de aumento no válida.')
+                return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
+            elif (fechaAumento_formato >= fecha_formato - timedelta(1)): #Falta un día o menos a la fecha del paseo
+                messages.error(request, 'Fecha de aumento no válida. No puedes aumentar el valor de un paseo faltando un día.')
+                return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
+
+            aumento = request.POST.get('aumento')
             esquemaCobro = EsquemaCobro(tipo=esquema,valor=valor, fechaAumento=fechaAumento,valorAumento=aumento,puntoEquilibrio=-1,descuento=-1)
-            esquemaCobro.save()
+
         elif esquema == "Volumen":
-                        
+            equilibrio = request.POST.get('equilibrio')
+            descuento = request.POST.get('descuento')
+
             # Crear una cadena de texto con la fecha en el formato correcto
             fecha = "2022-12-31"
 
@@ -72,19 +107,9 @@ def registrarPaseo(request):
 
             # Crear una nueva instancia de EsquemaCobro con la fecha
             esquemaCobro = EsquemaCobro(tipo=esquema, valor=valor, puntoEquilibrio=equilibrio, descuento=descuento, fechaAumento=fecha_date, valorAumento=-1)
-            #esquemaCobro = EsquemaCobro(tipo=esquema,valor=valor, puntoEquilibrio = equilibrio, descuento=descuento,fechaAumento=datetime.strptime("0000-00-00", '%Y-%m-%d').date(),valorAumento=-1)
-            esquemaCobro.save()
         else:
-            messages.error(request, 'Esquema de cobro no válido')
+            messages.error(request, 'Esquema de cobro no válido.')
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas})
-
-        # Creamos el paseo
-        origen = request.POST.get('origen')
-        fecha = request.POST.get('fecha')
-        hora = request.POST.get('hora')
-        destino = request.POST.get('destino')
-        descripcion = request.POST.get('descripcion')
-        disponibilidad = chiva.capacidad
 
         # Leemos contenido de las imagenes
         imagen1 = request.FILES.get('imagen1')
@@ -114,17 +139,21 @@ def registrarPaseo(request):
             imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
             imagen_base64 += "-"
 
+        # Creamos el paseo
         paseo = Paseo(
             origen=origen, fecha=fecha, hora=hora, destino=destino,
             chiva=chiva, descripcion=descripcion,esquemaCobro=esquemaCobro,
             imagen=imagen_base64, disponibilidad=disponibilidad
         )
 
+        # Proceso existoso
+        esquemaCobro.save()
         paseo.save()
-        messages.success(request, 'Paseo registrado con éxito.')
         # Actualizamos el estado de la chiva escogida
         chiva.estado = 'No Disponible'
         chiva.save()
+
+        messages.success(request, 'Paseo registrado con éxito.')
         return redirect('./')  # Redirigir a la página adecuada después de guardar
 
     template = loader.get_template('registrarPaseo.html')

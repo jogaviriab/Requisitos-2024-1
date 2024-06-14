@@ -162,10 +162,10 @@
               <input name='fecha' type="date" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
     
               <span class="input-group-text" id="inputGroup-sizing-default">Chiva</span>
-              <select name="chiva" id="chivasDisponibles" class="form-select" onchange="seleccionarChiva(this)">
+              <select name="chiva" id="chivasDisponibles" class="form-select">
                 <option selected>Seleccionar</option>
                 {% for chiva in listaChivas %}
-                    <option value="{{ chiva.placa }}">{{ chiva.placa}} - {{ chiva.tipo }}</option>
+                    <option value="{{ chiva.placa }}">{{ chiva.placa}} - {{ chiva.tipo }} - {{ chiva.capacidad }} cupos</option>
                 {% endfor %}
               </select>
             </div>
@@ -176,9 +176,6 @@
                 
               <span class="input-group-text" id="inputGroup-sizing-default">Hora</span>
               <input name='hora' type="time" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
-                
-              <span class="input-group-text" id="cupos" hidden>Cupos</span>
-              <input  class="form-control" id="valorCupos" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" aria-disabled="false" disabled hidden>
             </div>
       
             <div class="input-group">
@@ -204,10 +201,10 @@
   
             <div class="input-group mb-3">
               <span class="input-group-text" id="esquema" hidden>Punto Equilibrio</span>
-              <input name='equilibrio' type="number" class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" hidden required>
+              <input name='equilibrio' type="number" class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" hidden>
       
               <span class="input-group-text" id="esquema2" hidden>Descuento</span>
-              <input name='descuento' type="number" class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default" hidden required>
+              <input name='descuento' type="number" class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default" hidden>
             </div>
           </br>
   
@@ -351,7 +348,7 @@
   
           <!-- Botones de confirmar/cancelar -->
           <button type="submit" class="btn btn-success">Registrar</button>
-          <button type="button" class="btn btn-danger">Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="location.reload()">Cancelar</button>
         </form>
       </div>
     

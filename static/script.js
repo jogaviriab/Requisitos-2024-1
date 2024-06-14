@@ -118,53 +118,6 @@ function cambiarVistaP(numeroImagen){
 
 }
 
-function seleccionarChiva(elemento, disponibilidad) {
-    let opcionSeleccionada = elemento.value;
-    // let placa = opcionSeleccionada.split(' - ');
-    // Hacer consulta a bd para obtener la capacidad de la chiva
-
-    // Habilitar/Deshabilitar el campo de cupos
-    if (opcionSeleccionada !== 'Seleccionar'){
-        // document.getElementById('cupos').removeAttribute('hidden');
-        // //Debemos conectarnos a la bd para conocer la capacidad de la chiva seleccionada
-        // const sqlite3 = require('sqlite3').verbose();
-        // // Conectarse a la base de datos
-        // const db = new sqlite3.Database('/db.sqlite3', sqlite3.OPEN_READWRITE, (err) => {
-        // if (err) {    
-        //     console.error(err.message);
-        // }
-        // console.log('Conectado a la base de datos SQLite.');                            
-        // });
-
-        // // Realizar consulta
-        // const sql = 'SELECT * FROM paseos_chiva WHERE placa = ? ';
-
-        // db.all(sql, [placa], (err, rows) => {
-        // if (err) {
-        //     throw err;
-        // }
-        // rows.forEach((row) => {
-        //     console.log(row);
-        // });
-        // });
-
-        // // Cerrar la conexión con la base de datos
-        // db.close((err) => {
-        // if (err) {
-        //     console.error(err.message);
-        // }
-        // console.log('Conexión a la base de datos cerrada.');
-        // });
-
-        document.getElementById('valorCupos').value = disponibilidad;
-        document.getElementById('valorCupos').removeAttribute('hidden');
-
-    } else {
-        document.getElementById('cupos').setAttribute('hidden', 'true');
-        document.getElementById('valorCupos').setAttribute('hidden', 'true');
-    }
-}
-
 function seleccionarEsquema(elemento){
     let opcionSeleccionada = elemento.value;
     let texto1 = document.getElementById('esquema');
@@ -181,12 +134,14 @@ function seleccionarEsquema(elemento){
         input1.removeAttribute('hidden');
         input1.setAttribute('type', 'number'); 
         input1.setAttribute('name', 'equilibrio');
+        input1.setAttribute('required', '');
 
         texto2.removeAttribute('hidden');
         texto2.textContent = 'Descuento';
 
         input2.removeAttribute('hidden');
         input2.setAttribute('name','descuento');
+        input2.setAttribute('required', '');
 
     } else if (opcionSeleccionada === 'Aerolínea'){
 
@@ -196,12 +151,14 @@ function seleccionarEsquema(elemento){
         input1.removeAttribute('hidden');
         input1.setAttribute('type', 'date'); 
         input1.setAttribute('name', 'fechaAumento');
+        input1.setAttribute('required', '');
 
         texto2.removeAttribute('hidden');
         texto2.textContent = 'Valor Aumento';
 
         input2.removeAttribute('hidden');
         input2.setAttribute('name','aumento');
+        input2.setAttribute('required', '');
 
     } else {
         document.getElementById('esquema').setAttribute('hidden', 'true');

@@ -209,3 +209,23 @@
     transition-duration: 0.5s;
     transform: rotate(160deg);
 }
+
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+#squareData {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+#containerData {
+    width: 100%;
+}
+
+.form-label, .form-control {
+    text-align: center;
+}

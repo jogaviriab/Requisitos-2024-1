@@ -54,7 +54,14 @@ def registrarPaseo(request):
         imagen2 = request.FILES.get('imagen2')
         imagen3 = request.FILES.get('imagen3')
         esquema = request.POST.get('esquema')
-        fecha_actual = datetime.now()
+        fechaAumento = False
+        aumento = False
+        equilibrio = False
+        descuento = False
+
+        fechaActual = datetime.now()
+        fechaFormato = datetime.strptime(fecha,'%Y-%m-%d').date() 
+        horaFormato = datetime.strptime(hora, '%H:%M'). time()
 
         # Necesitamos validar el esquema escogido para obtener todos los datos
         # Al crear un paseo primero se tiene que crear el esquema de cobro
@@ -62,17 +69,17 @@ def registrarPaseo(request):
         if esquema == "Aerolínea":
             fechaAumento = request.POST.get('fechaAumento')
             aumento = request.POST.get('aumento')
-            fechaAumento_formato  = datetime.strptime(fechaAumento, '%Y-%m-%d').date() 
+            fechaAumentoFormato  = datetime.strptime(fechaAumento, '%Y-%m-%d').date() 
 
             # Comprobaciones fecha de aumento
-            if (fechaAumento_formato < fecha_actual.date()): # Fecha de aumento menor a la actual
+            if (fechaAumentoFormato < fechaActual.date()): # Fecha de aumento menor a la actual
                 messages.error(request, 'Fecha de aumento no válida.')
                 return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento})
-            elif (fechaAumento_formato >= fecha_formato - timedelta(1)): #Falta un día o menos a la fecha del paseo
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento})
+            elif (fechaAumentoFormato >= fechaFormato - timedelta(1)): #Falta un día o menos a la fecha del paseo
                 messages.error(request, 'Fecha de aumento no válida. No puedes aumentar el valor de un paseo faltando un día.')
                 return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento })
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento })
 
             esquemaCobro = EsquemaCobro(tipo=esquema,valor=valor, fechaAumento=fechaAumento,valorAumento=aumento,puntoEquilibrio=-1,descuento=-1)
 
@@ -80,11 +87,27 @@ def registrarPaseo(request):
             equilibrio = request.POST.get('equilibrio')
             descuento = request.POST.get('descuento')
 
+            # Comprobaciones equilibrio
+            # Primero se obtiene la chiva
+            try:
+                chiva = Chiva.objects.get(placa=placaChiva)
+            except ObjectDoesNotExist:
+                messages.error(request,"Por favor seleccione una chiva válida.")
+                return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
+                    'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                    'equilibrio': equilibrio, 'descuento': descuento})
+
+            if int(equilibrio) > chiva.capacidad: 
+                messages.error(request, 'El punto de equilibrio no puede superar la capacidad de la chiva.')
+                return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'equilibrio': equilibrio, 'descuento': descuento})
+
             # Crear una cadena de texto con la fecha en el formato correcto
-            fecha = "2022-12-31"
+            fechaVolumen = "2022-12-31"
 
             # Convertir la cadena de texto en un objeto datetime
-            fecha_datetime = datetime.strptime(fecha, '%Y-%m-%d')
+            fecha_datetime = datetime.strptime(fechaVolumen, '%Y-%m-%d')
 
             # Obtener solo la parte de la fecha del objeto datetime
             fecha_date = fecha_datetime.date()
@@ -94,7 +117,7 @@ def registrarPaseo(request):
         else:
             messages.error(request, 'Esquema de cobro no válido.')
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva})
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva})
 
         # Conseguimos la chiva con la placa y comprobamos que exista
         try:
@@ -102,27 +125,25 @@ def registrarPaseo(request):
         except ObjectDoesNotExist:
             messages.error(request,"Por favor seleccione una chiva válida.")
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
                 'equilibrio': equilibrio, 'descuento': descuento})
 
         # Comprobaciones de fecha
-        fecha_formato = datetime.strptime(fecha,'%Y-%m-%d').date() 
-        hora_formato = datetime.strptime(hora, '%H:%M'). time()
-        if (fecha_formato < fecha_actual.date()): # Fecha menor a la actual
+        if (fechaFormato < fechaActual.date()): # Fecha menor a la actual
             messages.error(request, 'Fecha del paseo no válida.')
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
                 'equilibrio': equilibrio, 'descuento': descuento})
-        elif (fecha_formato < fecha_actual.date() + timedelta(2)): # Faltan menos de dos días para la fecha del paseo
+        elif (fechaFormato < fechaActual.date() + timedelta(2)): # Faltan menos de dos días para la fecha del paseo
             messages.error(request, 'Fecha del paseo no válida. Debes registrar un paseo nuevo con al menos dos días de anticipación.')
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
                 'equilibrio': equilibrio, 'descuento': descuento})
-        elif (fecha_formato == fecha_actual.date() + timedelta(2)): # Faltan exactamente dos días, se comprueba la hora
-            if (hora_formato < fecha_actual.time()): #Hora menor a la actual, faltan menos de dos días
+        elif (fechaFormato == fechaActual.date() + timedelta(2)): # Faltan exactamente dos días, se comprueba la hora
+            if (horaFormato < fechaActual.time()): #Hora menor a la actual, faltan menos de dos días
                 messages.error(request, 'Fecha del paseo no válida. Debes registrar un paseo nuevo con al menos dos días de anticipación. Ten en cuenta la hora del paseo.')
                 return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
                 'equilibrio': equilibrio, 'descuento': descuento})
 
         # Leemos contenido de las imagenes
@@ -131,7 +152,7 @@ def registrarPaseo(request):
         if not(imagen1) and not(imagen2) and not(imagen3):
             messages.error(request, 'Debes subir al menos una imagen.')
             return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
-                'hora': hora, 'esquema': esquema, 'valor': valor, 'chiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
                 'equilibrio': equilibrio, 'descuento': descuento})
 
         if imagen1:

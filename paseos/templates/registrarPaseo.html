@@ -50,7 +50,7 @@
     <div class="row">
 
         <!-- Imagenes del paseo -->
-        <div id="carouselExampleIndicators" class="carousel slide col ms-3">
+        <div id="carouselExampleIndicators" class="carousel slide col ms-3" data-bs-interval="false">
           
           <!-- Carrusel de fotos -->
           <div class="carousel-inner mt-5" id="carrusel" hidden>
@@ -173,7 +173,11 @@
               <select name="chiva" id="chivasDisponibles" class="form-select">
                 <option selected>Seleccionar</option>
                 {% for chiva in listaChivas %}
+                  {% if chiva.placa == placaChiva%}
+                  <option value="{{ chiva.placa }}" selected>{{ chiva.placa}} - {{ chiva.tipo }} - {{ chiva.capacidad }} cupos</option>
+                  {% else %}
                   <option value="{{ chiva.placa }}">{{ chiva.placa}} - {{ chiva.tipo }} - {{ chiva.capacidad }} cupos</option>
+                  {% endif %}
                 {% endfor %}
               </select>
             </div>
@@ -212,15 +216,23 @@
               <span class="input-group-text" id="inputGroup-sizing-default">Tipo costo</span>
               <select name="esquema" id="inputState" class="form-select" onchange="seleccionarEsquema(this)">
                 <option selected>Seleccionar</option>
+                {% if esquema == 'Aerolínea'%}
+                <option selected>Aerolínea</option>
+                <option>Volumen</option>
+                {% elif esquema == 'Volumen' %}
+                <option>Aerolínea</option>
+                <option selected>Volumen</option>
+                {% else %}
                 <option>Aerolínea</option>
                 <option>Volumen</option>
+                {% endif %}
               </select>
                 
               <span class="input-group-text" id="inputGroup-sizing-default">Valor</span>
               {% if valor %}
-              <input name='valor' value="{{valor}}" id="valor" type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+              <input name='valor' value="{{valor}}" id="valor" type="number" min="0" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
               {% else %}
-              <input name='valor' id="valor" type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+              <input name='valor' id="valor" type="number" min="0" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
               {% endif %}
             
             </div>
@@ -229,24 +241,24 @@
 
               {% if equilibrio%}
               <span class="input-group-text" id="esquema">Punto Equilibrio</span>
-              <input name='equilibrio'value='{{equilibrio}}' type="number" class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+              <input name='equilibrio'value='{{equilibrio}}' type="number" min='0' class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
       
               <span class="input-group-text" id="esquema2">Descuento</span>
-              <input name='descuento' value='{{descuento}}' type="number" class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default">
+              <input name='descuento' value='{{descuento}}' type="number" min='0' class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default">
               
               {% elif aumento%}
               <span class="input-group-text" id="esquema">Fecha Aumento</span>
               <input name='fechaAumento' value="{{fechaAumento}}" type="date" class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
       
               <span class="input-group-text" id="esquema2">Valor Aumento</span>
-              <input name='aumento' value="{{aumento}}" type="number" class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default">
+              <input name='aumento' value="{{aumento}}" type="number" min='0' class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default">
               
               {% else %}
               <span class="input-group-text" id="esquema" hidden>Punto Equilibrio</span>
-              <input name='equilibrio' type="number" class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" hidden>
+              <input name='equilibrio' type="number" class="form-control" min='0' id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" hidden>
       
               <span class="input-group-text" id="esquema2" hidden>Descuento</span>
-              <input name='descuento' type="number" class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default" hidden>
+              <input name='descuento' type="number" class="form-control" min='0' id="esquema3" aria-describedby="inputGroup-sizing-default" hidden>
               {% endif %}
             </div>
           </br>
@@ -259,11 +271,8 @@
               <label for="formFileMultiple" class="form-label">Formatos: .png, .jpg, .avif, .jpeg</label>
   
               <div class="row">
-                {% if imagen1 %}
-                <input class="form-control ms-2" value="{{imagen1}}" name='imagen1' id='imagen1' type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
-                {% else %}
                 <input class="form-control ms-2" name='imagen1' id='imagen1' type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
-                {% endif %}
+
 
                 <button type='button' class="button ms-3" id="papelera1" onclick="eliminarImagen(this)" hidden>
                   <svg
@@ -396,7 +405,7 @@
   
           <!-- Botones de confirmar/cancelar -->
           <button type="submit" class="btn btn-success">Registrar</button>
-          <button type="button" class="btn btn-danger" onclick="location.reload()">Cancelar</button>
+          <button type="button" class="btn btn-danger" onclick="window.location.assign('/paseos/registrarPaseo')">Cancelar</button>
         </form>
       </div>
     

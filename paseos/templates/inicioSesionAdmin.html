@@ -22,17 +22,18 @@
         <div id="squareData" class="container col-12 col-md-4 ">
             <div id="containerData" class="p-3 mb-2 bg-dark-subtle text-dark-emphasis">    
                 <section id="registerData">
-                    <form class="row g-3 needs-validation" novalidate>
+                    <form class="row g-3 needs-validation" method="post" novalidate>
+                        {% csrf_token %}
                         <div class="col-md-12 text-center">
-                        <label for="validationCustom01" class="form-label">Nombre completo</label>
-                        <input type="text" class="form-control" id="validationCustom01" required>
+                        <label for="email" class="form-label">Correo eléctronico</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
                             <div class="invalid-feedback">
-                                Ingrese un nombre válido. 
+                                Ingrese un correo válido. 
                             </div>
                         </div>
                         <div class="col-md-12 text-center">
-                            <label for="validationCustom06" class="form-label">Contraseña</label>
-                            <input type="text" class="form-control" id="validationCustom06" required>
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="text" class="form-control" id="password" name="password" required>
                                 <div class="invalid-feedback">
                                     Ingrese una contraseña válida. 
                                 </div>
@@ -40,29 +41,47 @@
                         <div class="col-12 text-center py-2">
                         <button class="btn btn-primary" type="submit">Ingresar</button>
                         </div>
-                        <script>
-                            (() => {
-    'use strict'
-
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    const forms = document.querySelectorAll('.needs-validation')
-
-    // Loop over them and prevent submission
-    Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-        if (!form.checkValidity()) {
-            event.preventDefault()
-            event.stopPropagation()
-        }
-
-        form.classList.add('was-validated')
-        }, false)
-    })
-    })()
-                        </script>
+                        {% if messages %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for message in messages %}
+                                <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
                     </form>
                 </section>
             </div>
         </div>
     </div>
+    <script>
+        (() => {
+            'use strict';
+    
+            const forms = document.querySelectorAll('.needs-validation');
+    
+            forms.forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+    
+                    form.classList.add('was-validated');
+                }, false);
+    
+                // Agregar validación al salir de cada campo
+                form.querySelectorAll('.form-control').forEach(input => {
+                    input.addEventListener('blur', () => {
+                        if (input.checkValidity()) {
+                            input.classList.remove('is-invalid');
+                        } else {
+                            input.classList.add('is-invalid');
+                        }
+                    });
+                });
+            });
+        })();
+    </script>
 </body>

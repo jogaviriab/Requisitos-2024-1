@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from paseos.backends import AdminAuthentication
 from django.template import loader
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
@@ -30,10 +31,19 @@ def verAdmins(request):
     return HttpResponse(template.render(context, request))
 
 def inicioSesionAdmin(request):
-    template = loader.get_template('inicioSesionAdmin.html')
-    context = {}
+    if request.method == 'POST':
+        email = request.POST.get('email'); email = email.lower()
+        password = request.POST.get('password')
+        authBack = AdminAuthentication()
 
-    return HttpResponse(template.render(context, request))
+        user = authBack.authenticate(request, email=email, password=password)
+
+        if user is not None:
+            return redirect('verPaseosAdmin')
+        else:
+            messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+    
+    return render(request, 'inicioSesionAdmin.html')
 
 def registrarPaseo(request):
 

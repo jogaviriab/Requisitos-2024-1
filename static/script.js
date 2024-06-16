@@ -40,15 +40,15 @@ function cargarCarrusel(url, numeroImagen){
     carrusel.removeAttribute('hidden'); //Habilitar
 
     //Quitar el activo de otra imagen
-    let imagenActiva = document.getElementsByClassName('carousel-item active ms-5');
-    if (imagenActiva.length > 0){ imagenActiva[0].setAttribute('class','carousel-item ms-5')};
+    let imagenActiva = document.getElementsByClassName('carousel-item active ms-5 me-5');
+    if (imagenActiva.length > 0){ imagenActiva[0].setAttribute('class','carousel-item ms-5 me-5')};
 
     //Verificar si ya se habia cargado imagen en el mismo input 
     let divPrevio = document.getElementById('prev'+numeroImagen);
     if (divPrevio === null){ 
         //Crear el div y la imagen nueva
         let div = document.createElement('div');
-        div.setAttribute('class', "carousel-item active ms-5");
+        div.setAttribute('class', "carousel-item active ms-5 me-5");
         div.setAttribute('style', 'width: 70%');
         let img = document.createElement('img');
         img.setAttribute('class', 'd-block w-100 img-thumbnail');
@@ -61,7 +61,7 @@ function cargarCarrusel(url, numeroImagen){
     } else {
         //Reemplazar foto
         divPrevio.getElementsByTagName('img')[0].setAttribute('src', url);
-        divPrevio.setAttribute('class', 'carousel-item active ms-5');
+        divPrevio.setAttribute('class', 'carousel-item active ms-5 me-5');
     }
     
     //Botones carrusel
@@ -135,6 +135,7 @@ function seleccionarEsquema(elemento){
         input1.setAttribute('type', 'number'); 
         input1.setAttribute('name', 'equilibrio');
         input1.setAttribute('required', '');
+        input1.value = null;
 
         texto2.removeAttribute('hidden');
         texto2.textContent = 'Descuento';
@@ -142,6 +143,7 @@ function seleccionarEsquema(elemento){
         input2.removeAttribute('hidden');
         input2.setAttribute('name','descuento');
         input2.setAttribute('required', '');
+        input2.value = null;
 
     } else if (opcionSeleccionada === 'Aerolínea'){
 
@@ -152,6 +154,7 @@ function seleccionarEsquema(elemento){
         input1.setAttribute('type', 'date'); 
         input1.setAttribute('name', 'fechaAumento');
         input1.setAttribute('required', '');
+        input1.value = null;
 
         texto2.removeAttribute('hidden');
         texto2.textContent = 'Valor Aumento';
@@ -159,11 +162,13 @@ function seleccionarEsquema(elemento){
         input2.removeAttribute('hidden');
         input2.setAttribute('name','aumento');
         input2.setAttribute('required', '');
+        input2.value = null;
 
     } else {
         document.getElementById('esquema').setAttribute('hidden', 'true');
         document.getElementById('esquema1').setAttribute('hidden', 'true');
         document.getElementById('esquema2').setAttribute('hidden', 'true');
         document.getElementById('esquema3').setAttribute('hidden', 'true');
+        document.getElementById('valor').value = null;
     }
 }

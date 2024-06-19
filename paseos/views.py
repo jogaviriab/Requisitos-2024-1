@@ -8,16 +8,18 @@ from django.contrib import messages
 from datetime import datetime, timedelta
 
 import base64
+import json
 
 
 from . forms import ChivaForm
 from . forms import PaseoForm
 
-
 from .models import Administrador
 from .models import Chiva
 from .models import Paseo
 from .models import EsquemaCobro
+from .models import Desembolso
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the Paseos index.")
@@ -262,11 +264,28 @@ def eliminarChiva(request, placa):
     messages.warning(request, 'Chiva eliminada con exito')
     return redirect('../')
 
-def hola(request):
-    template = loader.get_template('hola.html')
+def desembolsos(request):
+    listaDesembolsos = Desembolso.objects.all()
+
+    if request.method == 'POST':
+        
+        comprobante = request.FILES.get('comprobante')
+        
+        if (comprobante):
+            print('hola')
+            messages.success(request, 'Desembolso realizado con éxito.')  
+            return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+        else:
+            print('hol')
+            messages.error(request, 'Debes subir el comprobante de devolución.')
+            return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+            
+    template = loader.get_template('desembolsos.html')
     context = {
-        'nombre': 'Mundo'
+        'listaDesembolsos': listaDesembolsos
     }
 
+    return HttpResponse(template.render(context, request))
 
-    return HttpResponse(template.render(context,request))
+def confirmacionDesembolso():
+    print(1)

@@ -9,5 +9,7 @@ urlpatterns = [
     path('chivas/eliminarChiva/<str:placa>', views.eliminarChiva, name='eliminarChiva'),
     path('verPaseosAdmin/', views.verPaseosAdmin, name='verPaseosAdmin'),
     path('paseoAdmin/<int:id>', views.paseoAdmin, name='paseoAdmin'),      
-    path('inicioSesionAdmin/', views.inicioSesionAdmin, name='inicioSesionAdmin' )
+    path('inicioSesionAdmin/', views.inicioSesionAdmin, name='inicioSesionAdmin' ),
+    path('desembolsos/', views.desembolsos, name='desembolsos'),
+    path('desembolsos/confirmacionDesembolso', views.confirmacionDesembolso, name='confirmacionDesembolsos')
 ]

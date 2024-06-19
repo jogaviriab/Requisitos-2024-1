@@ -56,6 +56,10 @@ class Reserva(models.Model):
     comprobantePago = models.CharField(max_length=200)
     persona = models.ForeignKey(Cliente, on_delete=models.CASCADE)
 
+class Desembolso(models.Model):
+    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
+    monto = models.IntegerField()
+    motivo = models.CharField(max_length=500)
 
 class AdministradorManager(BaseUserManager):
     def create_user(self, nombre, correo, celular, edad, rol, password=None, **extra_fields):

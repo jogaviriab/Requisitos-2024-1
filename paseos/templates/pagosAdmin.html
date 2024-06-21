@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <title>Pagos</title>
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">  
+
+</head>
+<body>
+    <header>
+        {% include 'navbarAdmin.html' %}
+        <p class="fs-2 fw-bold text-center m-0">Reservas y confirmación de pagos</p>
+    </header>
+    <main class="pagosMain">
+        <div id="squereMain" class="container">
+            <div class="btn-group mt-2 mb-2">
+                <button type="button" class="btn btn-secondary">Estado</button>
+                <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                <li><a class="dropdown-item {% if lista == 'confirmadas' %}active{% endif %}" href="?lista=confirmadas">Confirmadas</a></li>
+                <li><a class="dropdown-item {% if lista == 'pendientes' %}active{% endif %}" href="?lista=pendientes">Pendientes</a></li>
+            </div>
+            <table class="table table-bordered border-black">
+                <thead>
+                  <tr class="table-dark table-bordered border-light-subtle">
+                    <th scope="col" class="text-center">ID</th>
+                    <th scope="col" class="text-center">Nombre</th>
+                    <th scope="col" class="text-center">No. paseo</th>
+                    <th scope="col" class="text-center">Estado</th>
+                    <th scope="col" class="text-center">Comprobante</th>
+                    <th scope="col" class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for reserva in listaReservas %}     
+                  <tr>
+                    <th scope="row" class="text-center">{{reserva.persona.id}}</th>
+                    <td class="text-center">{{reserva.persona.nombre}}</td>
+                    <td class="text-center">{{reserva.paseo.id}}</td>
+                    <td class="text-center">{{reserva.estado}}</td>
+                    <td class="text-center">
+                        {% if reserva.comprobantePago == 'none' %}
+                            Comprobante pendiente
+                        {% else %} 
+                            <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#pagosModal{{ reserva.persona.id }}">
+                                Ver comprobante
+                            </button>
+                        {% endif %}
+                    </td>
+                    <td class="text-end"><button type="button" class="btn btn-primary me-2">Confirmar</button><button type="button" class="btn btn-danger">Rechazar</button></td>
+                  </tr>
+                  {% include 'modal.html' with reserva=reserva %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination-wrapper">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if listaReservas.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?lista={{ lista }}&page={{ listaReservas.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for num in listaReservas.paginator.page_range %}
+                        {% if listaReservas.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > listaReservas.number|add:'-3' and num < listaReservas.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?lista={{ lista }}&page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if listaReservas.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?lista={{ lista }}&page={{ listaReservas.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </main>
+</body>
+</html>

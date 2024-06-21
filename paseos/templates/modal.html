@@ -1,0 +1,16 @@
+
+  
+<!-- Modal -->
+<div class="modal fade" id="pagosModal{{ reserva.persona.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Comprobante de pago</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img src="data:image/jpeg;base64,{{ reserva.comprobantePago }}" class="img-fluid" alt="comprobante de {{reserva.persona.nombre}}">
+            </div>
+        </div>
+    </div>
+</div>

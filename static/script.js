@@ -171,3 +171,49 @@ function seleccionarEsquema(elemento){
         document.getElementById('valor').value = null;
     }
 }
+
+function comprobantePago(elemento){
+
+    // Obtenemos los datos
+    let rutaInicial = 'data:image/jpeg;base64,';
+    let rutaImagen = elemento.getAttribute('data-python-variable');
+    let imagen = document.getElementById('imagenComprobante');
+    
+    // Actualizamos el src del modal 
+    imagen.setAttribute('src', rutaInicial + rutaImagen);
+
+}
+
+function completarDesembolso(elemento, fila){
+    if (elemento.checked){ // Chequea la columna de completado
+        
+        //Obtenemos el token CSRF
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 'csrftoken'.length + 1) === ('csrftoken' + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring('csrftoken'.length + 1));
+                    break;
+                }
+            }
+        }
+
+        // Obtenemos el comprobante
+        let comprobantes = document.getElementsByName('comprobante');
+        let comprobante = comprobantes[fila - 1].files[0]; 
+        const formData = new FormData();
+        formData.append('comprobante', comprobante);
+        
+        //Lanzamos una solicitud POST
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': cookieValue
+            },
+            body: formData
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}

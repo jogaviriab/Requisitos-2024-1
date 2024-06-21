@@ -1,25 +1,25 @@
 from django.http import HttpResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, render
 from paseos.backends import AdminAuthentication
 from django.template import loader
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
-from django.core.paginator import Paginator
 
 from datetime import datetime, timedelta
 
 import base64
+import json
 
 
 from . forms import ChivaForm
 from . forms import PaseoForm
 
-
 from .models import Administrador
 from .models import Chiva
 from .models import Paseo
 from .models import EsquemaCobro
-from .models import Reserva
+from .models import Desembolso
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the Paseos index.")
@@ -220,7 +220,7 @@ def verPaseosAdmin(request):
 def paseoAdmin(request, id):
     try:
         paseo = Paseo.objects.get(pk=id)
-        chiva = Chiva.objects.get(pk=paseo.chiva.id)
+        chiva = Chiva.objects.get(pk=paseo.chiva.placa)
         esquema = EsquemaCobro.objects.get(pk=paseo.esquemaCobro.id)
         listaReservas = paseo.reserva_set.all()
 
@@ -237,26 +237,8 @@ def paseoAdmin(request, id):
     return HttpResponse(template.render(context, request))
 
 def chivas(request):
-    listaChivas = Chiva.objects.all()
-
     if request.method == 'POST':
         form = ChivaForm(request.POST)
-        chivaPlaca = request.POST.get("placa")
-        chivaCapacidad = request.POST.get("capacidad")
-        chivaTipo = request.POST.get("tipo")
-        chivaEstado = request.POST.get("estado")
-        
-        print(type(chivaCapacidad))
-
-
-       
-        if (chivaTipo == 'Normal') or (chivaTipo =='Rumbera'):
-            pass
-        else:
-            messages.error(request, 'Tipo de chiva no válido.')
-            return render(request, 'chivas.html', {'listaChivas': listaChivas, 'chivaPlaca' : chivaPlaca, 'chivaCapacidad' : chivaCapacidad })
-        
-
         if form.is_valid():
             form.save()
             messages.success(request, 'Chiva guardada con exito')
@@ -264,93 +246,46 @@ def chivas(request):
     else:
         form = ChivaForm()
 
-
+    listaChivas = Chiva.objects.all()
     template = loader.get_template('chivas.html')
     context = {
         'listaChivas': listaChivas,
         'form': form,
-        'actualización': None
     }
     return HttpResponse(template.render(context, request))
 
-def actualizarFormChiva(request, id):
-    chiva = get_object_or_404(Chiva, pk=id)
-
-    if request.method == 'POST':
-        chivaPlaca = request.POST.get("placa")
-        chivaCapacidad = request.POST.get("capacidad")
-        print( request.POST.get("tipo"))
-        chivaTipo = request.POST.get("tipo")
-        chivaEstado = request.POST.get("estado")
-        
-        chiva.placa = chivaPlaca
-        chiva.capacidad = chivaCapacidad
-        chiva.tipo = chivaTipo
-        chiva.estado = chivaEstado
-        chiva.save()
-
-        messages.success(request, 'Chiva actualizada con éxito')
-        return redirect('chivas')
-    else:
-        form = ChivaForm(instance=chiva)
-
-    paseoChiva = None
+def eliminarChiva(request, placa):
     try:
-        paseoChiva = Paseo.objects.get(chiva_id=id)
-        print(paseoChiva.id)
-    except ObjectDoesNotExist:
-        pass
-        
-        # messages.error(request,"Por favor seleccione una chiva válida.")
-    
-
-    listaChivas = Chiva.objects.all()
-
-    context = {
-        'listaChivas': listaChivas,
-        'form': form,
-        'actualizacion': chiva,
-        'paseoChiva': paseoChiva
-    }
-    return render(request, 'chivas.html', context)
-
-def eliminarChiva(request, id):
-    try:
-        chiva = Chiva.objects.get(pk=id)
+        chiva = Chiva.objects.get(pk=placa)
     except Chiva.DoesNotExist:
         return messages.error('Chiva no encontrada')
     
-    if Paseo.objects.filter(chiva_id=id).exists():
-        messages.error(request, 'Error al eliminar la chiva, esta se encuentra asociada a un paseo')
-    else:
-        chiva.delete()
-        messages.warning(request, 'Chiva eliminada con éxito')
-  
+    chiva.delete()
+    messages.warning(request, 'Chiva eliminada con exito')
     return redirect('../')
 
-def hola(request):
-    template = loader.get_template('hola.html')
+def desembolsos(request):
+    listaDesembolsos = Desembolso.objects.all()
+
+    if request.method == 'POST':
+        
+        comprobante = request.FILES.get('comprobante')
+        
+        if (comprobante):
+            print('hola')
+            messages.success(request, 'Desembolso realizado con éxito.')  
+            return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+        else:
+            print('hol')
+            messages.error(request, 'Debes subir el comprobante de devolución.')
+            return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+            
+    template = loader.get_template('desembolsos.html')
     context = {
-        'nombre': 'Mundo'
+        'listaDesembolsos': listaDesembolsos
     }
 
+    return HttpResponse(template.render(context, request))
 
-    return HttpResponse(template.render(context,request))
-
-def pagosAdmin(request):
-    pendientes = Reserva.objects.filter(estado="pendiente")
-    confirmadas = Reserva.objects.filter(estado="confirmada")
-
-    lista = request.GET.get('lista', 'confirmadas')
-
-    if lista == 'pendientes':
-        listaReservas = pendientes
-    else:
-        listaReservas = confirmadas
-
-    paginator = Paginator(listaReservas, 10)
-
-    pageNumber = request.GET.get('page')
-    objsReserva = paginator.get_page(pageNumber)
-    return render(request, 'pagosAdmin.html', {'listaReservas' : objsReserva,
-                                               'lista' : lista})
+def confirmacionDesembolso():
+    print(1)

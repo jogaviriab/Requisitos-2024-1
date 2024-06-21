@@ -17,9 +17,8 @@ class Cliente(models.Model):
     rol = models.CharField(max_length=100)
     cuentaBancaria = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE)
 
-
 class Chiva(models.Model):
-    placa = models.CharField( max_length=100, unique=True )
+    placa = models.CharField(max_length=100, unique=True)
     capacidad = models.IntegerField()
     estado = models.CharField(max_length=100)
     tipo = models.CharField(max_length=100)
@@ -33,7 +32,7 @@ class EsquemaCobro(models.Model):
     descuento = models.IntegerField()
 
 class Paseo(models.Model):
-    imagen = models.CharField(max_length=500, default='default_value')
+    imagen = models.CharField(max_length=500000, default='default_value')
     origen = models.CharField(max_length=100)
     destino = models.CharField(max_length=100)
     descripcion = models.CharField(max_length=300)
@@ -54,9 +53,13 @@ class Reserva(models.Model):
     fechaCreacion = models.DateField()
     valor = models.IntegerField()
     paquete = models.ForeignKey(Paquete, on_delete=models.CASCADE)
-    comprobantePago = models.CharField(max_length=200)
+    comprobantePago = models.CharField(max_length=200000, default='default_value')
     persona = models.ForeignKey(Cliente, on_delete=models.CASCADE)
 
+class Desembolso(models.Model):
+    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
+    monto = models.IntegerField()
+    motivo = models.CharField(max_length=500)
 
 class AdministradorManager(BaseUserManager):
     def create_user(self, nombre, correo, celular, edad, rol, password=None, **extra_fields):

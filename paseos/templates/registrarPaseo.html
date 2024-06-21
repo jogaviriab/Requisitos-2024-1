@@ -268,12 +268,10 @@
             <p class="fs-5 fw-bold">Imágenes del paseo</p>
             <div class="mb-3">
               <label for="formFileMultiple" class="form-label">A continuación puedes cargar las imágenes del paseo (min 1 - máx 3).</label>
-              <label for="formFileMultiple" class="form-label">Formatos: .png, .jpg, .avif, .jpeg</label>
+              <label for="formFileMultiple" class="form-label">Formatos: .jpg </label>
   
               <div class="row">
-                <input class="form-control ms-2" name='imagen1' id='imagen1' type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
-
-
+                <input class="form-control ms-2" name='imagen1' id='imagen1' type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".jpg">
                 <button type='button' class="button ms-3" id="papelera1" onclick="eliminarImagen(this)" hidden>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -316,7 +314,7 @@
               </div>
   
               <div class="row">
-                <input class="form-control ms-2" name='imagen2' id="imagen2" type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
+                <input class="form-control ms-2" name='imagen2' id="imagen2" type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".jpg">
                 <button type='button'  class="button ms-3" id="papelera2" onclick="eliminarImagen(this)" hidden>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -359,7 +357,7 @@
               </div>
   
               <div class="row">
-                <input class="form-control ms-2" name='imagen3' id="imagen3" type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".png, .jpg, .avif, .jpeg">
+                <input class="form-control ms-2" name='imagen3' id="imagen3" type="file" style="width: 70%;" onchange="cargarImagen(this)" accept=".jpg">
                 <button type='button' class="button ms-3" id="papelera3" onclick="eliminarImagen(this)" hidden>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -409,170 +407,6 @@
         </form>
       </div>
     
-      <script src="/static/script.js"></script>
-
-    
-<!-- <div class="container">
-    <h1 class="text-center">Crear Paseo</h1>
-    <div class="container" style="margin-top: 40px;" >
-          
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    {% if message.tags == 'success' %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% elif message.tags == 'error' %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-
-                    {% elif message.tags == 'warning' %}
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        {% endif %}
-        <div class="container">
-            <form  method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="row">
-                    
-                    <div class="col-sm-6 text-center">
-                        <h1>Imagen</h1>
-                        <div class="mb-3">
-                            <label for="formFile" class="form-label">Ingrese la imagen del paseo</label>
-                            <input class="form-control" type="file" id="formFile" name="imagen">
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6" >
-                        <div class="row" style="margin-bottom: 20px;">
-                            <div class="col-sm-6">
-                                <label for="inputOrigen" class="form-label">Origen</label>
-                                <input type="text"  class="form-control" id="inputOrigen" name="origen">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="inputDestino" class="form-label">Destino</label>
-                                <input type="text"  class="form-control" id="inputDestino" name="destino">
-                            </div>
-                           
-                        </div>
-                        <div class="row" style="margin-bottom: 20px;">
-                            <div class="col-sm-4">
-                                <label for="inputFecha" class="form-label">Fecha</label>
-                                <input type="date" placeholder="Fecha" class="form-control" id="inputFecha" name="fecha">
-                            </div>            
-                            <div class="col-sm-4">
-                                <label for="inputHora" class="form-label">Hora</label>
-
-                                <input type="time" placeholder="Hora" class="form-control" id="inputHora" name="hora">
-                            </div>
-
-                            <div class="col-sm-4">
-                                <label for="inputChiva" class="form-label">Chiva</label>
-                                <select id="inputState" class="form-select" name="chiva">
-                                    <option selected disabled>Chiva...</option>
-                                    {% for chiva in listaChivas %}
-                                        <option value="{{ chiva.placa }}">{{ chiva.placa}} - {{ chiva.tipo }}</option>
-                                    {% endfor %}
-                                </select>   
-                            </div>
-                        </div>
-                        <div class="row" style="margin-bottom: 20px;">
-                            <div class="col-mb-12">
-                                <label for="inputDescripcion" class="form-label">Descripción</label>
-
-                                <textarea class="form-control" id="Descripción" name="descripcion" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="row" style="margin-bottom: 20px;">
-                            <div class="col-md-6">
-                                <label for="inputEsquema" class="form-label">Esquema de Cobro</label>
-                                <select id="inputEsquema" class="form-select" name="esquema" onchange="toggleFields()">
-                                    <option selected>Esquema...</option>
-                                    <option value="Tipo Aerolinea">Tipo Aerolinea</option>
-                                    <option value="Por Volumen">Por Volumen</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="inputValor" class="form-label">Valor</label>
-                                <input type="number" class="form-control" id="inputValor" name="valor">
-                            </div>
-                        </div>
-                            <div class="row" >
-                                <div class="col-md-6" id="fechaAumentoField" style="display: none;">
-                                    <label for="inputFechaAumento" class="form-label">Fecha Aumento</label>
-                                    <input type="Date" class="form-control" id="inputFechaAumento" name="fechaAumento" >
-                                </div>
-
-                                <div class="col-md-6" id="aumentoField" style="display: none;">
-                                    <label for="inputAumento" class="form-label">Cantidad a Aumentar</label>
-                                    <input type="number" placeholder="Aumento" class="form-control" id="inputAumento" name="aumento">
-                                </div>
-                            </div>
-                            <div class="row" style="margin-bottom: 20px;" id="divEquilibrio">
-                                <div class="col-md-6" id="equilibrioField" style="display: none;">
-                                    <label for="inputEquilibrio" class="form-label">Punto Equilibrio</label>
-
-                                    <div class="input-group">
-                                
-                                    <input type="text" class="form-control" id="inputEquilibrio" name="equilibrio" max="30">
-                                    <div class="input-group-text">Maximo 30</div>
-
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6" id="descuentoField" style="display: none;">
-                                <label for="inputAumento" class="form-label">Cantidad a Descontar</label>
-                                    <input type="number" placeholder="Descuento" class="form-control" id="inputDescuento" name="descuento">
-                                </div>
-                            </div> -->
-                            <!-- <script>
-                                function toggleFields() {
-                                    console.log("toggleFields");
-                                    var selectedOption = document.getElementById("inputEsquema").value;
-                                    console.log(selectedOption);
-                                    var fechaAumentoField = document.getElementById("fechaAumentoField");
-                                    var aumentoField = document.getElementById("aumentoField");
-                                    var equilibrioField = document.getElementById("equilibrioField");
-                                    var descuentoField = document.getElementById("descuentoField");
-
-                                    if (selectedOption == "Tipo Aerolinea") {
-                                        console.log("tipoAerolinea");
-                                        fechaAumentoField.style.display = "block";
-                                        aumentoField.style.display = "block";
-                                        equilibrioField.style.display = "none";
-                                        descuentoField.style.display = "none";
-                                    } else if (selectedOption == "Por Volumen") {
-                                        console.log("porVolumen"); 
-                                        fechaAumentoField.style.display = "none";
-                                        aumentoField.style.display = "none";
-                                        equilibrioField.style.display = "block";
-                                        descuentoField.style.display = "block";
-                                    } else {
-                                        console.log("default");
-                                        fechaAumentoField.style.display = "none";
-                                        aumentoField.style.display = "none";
-                                        equilibrioField.style.display = "none";
-                                        descuentoField.style.display = "none";
-                                    }
-                                }
-                            </script> -->
-                    <!-- </div>
-                </div>
-            </form> -->
-        <!-- </div> -->
-    <!-- </div> -->
-        
-<!-- </div> -->
-    
+      <script src="/static/script.js"></script>    
 </body>
 </html>

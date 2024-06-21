@@ -33,7 +33,7 @@ class EsquemaCobro(models.Model):
     descuento = models.IntegerField()
 
 class Paseo(models.Model):
-    imagen = models.CharField(max_length=500, default='default_value')
+    imagen = models.CharField(max_length=500000, default='default_value')
     origen = models.CharField(max_length=100)
     destino = models.CharField(max_length=100)
     descripcion = models.CharField(max_length=300)
@@ -54,10 +54,14 @@ class Reserva(models.Model):
     fechaCreacion = models.DateField()
     valor = models.IntegerField()
     paquete = models.ForeignKey(Paquete, on_delete=models.CASCADE)
-    comprobantePago = models.CharField(max_length=200)
+    comprobantePago = models.CharField(max_length=200000)
     persona = models.ForeignKey(Cliente, on_delete=models.CASCADE)
 
-
+class Desembolso(models.Model):
+    monto = models.IntegerField()
+    motivo = models.CharField(max_length=200)
+    reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
+    
 class AdministradorManager(BaseUserManager):
     def create_user(self, nombre, correo, celular, edad, rol, password=None, **extra_fields):
         if not correo:

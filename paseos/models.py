@@ -17,6 +17,7 @@ class Cliente(models.Model):
     rol = models.CharField(max_length=100)
     cuentaBancaria = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE)
 
+
 class Chiva(models.Model):
     placa = models.CharField( max_length=100, unique=True )
     capacidad = models.IntegerField()

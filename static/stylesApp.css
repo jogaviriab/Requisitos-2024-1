@@ -229,3 +229,17 @@ body, html {
 .form-label, .form-control {
     text-align: center;
 }
+
+.pagosMain {
+    height: 90%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.pagination-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px; /* Ajusta este valor según sea necesario */
+}

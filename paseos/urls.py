@@ -10,5 +10,6 @@ urlpatterns = [
     path('chivas/actualizarChiva/<int:id>/', views.actualizarFormChiva, name='actualizarFormChiva'),
     path('verPaseosAdmin/', views.verPaseosAdmin, name='verPaseosAdmin'),
     path('paseoAdmin/<int:id>', views.paseoAdmin, name='paseoAdmin'),      
-    path('inicioSesionAdmin/', views.inicioSesionAdmin, name='inicioSesionAdmin' )
+    path('inicioSesionAdmin/', views.inicioSesionAdmin, name='inicioSesionAdmin' ),
+    path('pagosAdmin/', views.pagosAdmin, name='pagosAdmin' )
 ]

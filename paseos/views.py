@@ -4,6 +4,7 @@ from paseos.backends import AdminAuthentication
 from django.template import loader
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
+from django.core.paginator import Paginator
 
 from datetime import datetime, timedelta
 
@@ -18,6 +19,7 @@ from .models import Administrador
 from .models import Chiva
 from .models import Paseo
 from .models import EsquemaCobro
+from .models import Reserva
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the Paseos index.")
@@ -334,3 +336,21 @@ def hola(request):
 
 
     return HttpResponse(template.render(context,request))
+
+def pagosAdmin(request):
+    pendientes = Reserva.objects.filter(estado="pendiente")
+    confirmadas = Reserva.objects.filter(estado="confirmada")
+
+    lista = request.GET.get('lista', 'confirmadas')
+
+    if lista == 'pendientes':
+        listaReservas = pendientes
+    else:
+        listaReservas = confirmadas
+
+    paginator = Paginator(listaReservas, 10)
+
+    pageNumber = request.GET.get('page')
+    objsReserva = paginator.get_page(pageNumber)
+    return render(request, 'pagosAdmin.html', {'listaReservas' : objsReserva,
+                                               'lista' : lista})

@@ -8,34 +8,15 @@
     <link rel="stylesheet" href="{% static '/styles.css' %}">
     <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">  
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-        main {
-            height: 90%;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .pagination-wrapper {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-top: 10px; /* Ajusta este valor según sea necesario */
-        }
-    </style>
+
 </head>
 <body>
     <header>
         {% include 'navbarAdmin.html' %}
         <p class="fs-2 fw-bold text-center m-0">Reservas y confirmación de pagos</p>
     </header>
-    <main>
-        <div id="squereMain" class="container h-75 gap-2 border border-black border-1 rounded">
+    <main class="pagosMain">
+        <div id="squereMain" class="container">
             <div class="btn-group mt-2 mb-2">
                 <button type="button" class="btn btn-secondary">Estado</button>
                 <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
@@ -63,9 +44,18 @@
                     <td class="text-center">{{reserva.persona.nombre}}</td>
                     <td class="text-center">{{reserva.paseo.id}}</td>
                     <td class="text-center">{{reserva.estado}}</td>
-                    <td class="text-center">imagen</td>
+                    <td class="text-center">
+                        {% if reserva.comprobantePago == 'none' %}
+                            Comprobante pendiente
+                        {% else %} 
+                            <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#pagosModal{{ reserva.persona.id }}">
+                                Ver comprobante
+                            </button>
+                        {% endif %}
+                    </td>
                     <td class="text-end"><button type="button" class="btn btn-primary me-2">Confirmar</button><button type="button" class="btn btn-danger">Rechazar</button></td>
                   </tr>
+                  {% include 'modal.html' with reserva=reserva %}
                 {% endfor %}
                 </tbody>
             </table>

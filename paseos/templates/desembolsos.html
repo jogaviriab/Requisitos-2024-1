@@ -54,6 +54,7 @@
         </ul>
     {% endif %}
 
+    {% if listaDesembolsos %} 
     <!-- Tabla -->
     <div class = 'table-responsive' style="margin-right: 30px; margin-left: 30px;">
       {% csrf_token %}
@@ -75,15 +76,17 @@
             </thead>
 
             <tbody>
-              <tr>
-                <th> Juana </th>
-                <th> 123 </th>
-                <th> 3456 </th>
-                <th> 12457893659 </th>
-                <th> Bancolombia Ahorros</th>
-                <th> 20000 </th>
-                <th> 
-                  <button class="Documents-btn" style="height: 80% ;">
+
+              {% for desembolso in listaDesembolsos %}
+                <tr>
+                  <td> {{ desembolso.reserva.persona.nombre }} </td>
+                  <td> {{ desembolso.reserva.persona.id}}  </td>
+                  <td> {{ desembolso.reserva.persona.celular }} </td>
+                  <td> {{ desembolso.reserva.persona.cuentaBancaria.numCuenta }} </td>
+                  <td> {{ desembolso.reserva.persona.cuentaBancaria.entidadBancaria}} - {{ desembolso.reserva.persona.cuentaBancaria.tipoCuente }} </td>
+                  <td> {{ desembolso.monto }} </td>
+                  <td> 
+                  <button class="Documents-btn" style="height: 80% ;" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="comprobantePago(this)" data-python-variable="{{ desembolso.reserva.comprobantePago }}">
                   <span class="folderContainer">
                     <svg
                       class="fileBack"
@@ -163,46 +166,90 @@
                     </svg>
                   </span>
                   <p class="text" style = "margin-top: 5px;" >Vista Previa</p>
-                </button>
-                </th>
+                  </button>
+                  </th>
 
-                <th> Cancelación paseo </th>
-                <th> 
-                  <input class="form-control form-control-sm" id="formFileSm" name='comprobante' type="file">
-                </th>
-                <th> 
-                  <div class="checkbox-wrapper-12" style="margin-left: 40px; margin-right: 40px; margin-top: 10px; margin-bottom: 10px;">
-                    <div class="cbx" >
-                      <input id="cbx-12" type="checkbox" onchange="completarDesembolso(this, 1)">
-                      <label for="cbx-12"></label>
-                      <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
-                        <path d="M2 8.36364L6.23077 12L13 2"></path>
+                  <td> {{ desembolso.motivo }} </td>
+                  <td> 
+                    <input class="form-control form-control-sm" id="formFileSm" name='comprobante' type="file">
+                  </td>
+                  <td> 
+                    <div class="checkbox-wrapper-12" style="margin-left: 40px; margin-right: 40px; margin-top: 10px; margin-bottom: 10px;">
+                      <div class="cbx" >
+                        <input id="cbx-12" type="checkbox" onchange="completarDesembolso(this, 1)">
+                        <label for="cbx-12"></label>
+                        <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
+                          <path d="M2 8.36364L6.23077 12L13 2"></path>
+                        </svg>
+                      </div>
+                    
+                      <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <defs>
+                          <filter id="goo-12">
+                            <feGaussianBlur
+                              in="SourceGraphic"
+                              stdDeviation="4"
+                              result="blur"
+                            ></feGaussianBlur>
+                            <feColorMatrix
+                              in="blur"
+                              mode="matrix"
+                              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -7"
+                              result="goo-12"
+                            ></feColorMatrix>
+                            <feBlend in="SourceGraphic" in2="goo-12"></feBlend>
+                          </filter>
+                        </defs>
                       </svg>
                     </div>
-                  
-                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-                      <defs>
-                        <filter id="goo-12">
-                          <feGaussianBlur
-                            in="SourceGraphic"
-                            stdDeviation="4"
-                            result="blur"
-                          ></feGaussianBlur>
-                          <feColorMatrix
-                            in="blur"
-                            mode="matrix"
-                            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -7"
-                            result="goo-12"
-                          ></feColorMatrix>
-                          <feBlend in="SourceGraphic" in2="goo-12"></feBlend>
-                        </filter>
-                      </defs>
-                    </svg>
-                  </div>
-                </th>
-              </tr>
+                  </td>
+                </tr>
+              {% endfor %}
             </tbody>
         </table>
+
+        <!-- Modal del comprobante-->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Comprobante de Pago</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <img id='imagenComprobante' src="" style="width: 80%;"> 
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    {% else %}
+      <div class="modal" tabindex="-1" id="miModal">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Desembolsos</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="window.location.assign('/paseos/verPaseosAdmin')"></button>
+            </div>
+            <div class="modal-body">
+              <p>No existen desembolsos pendientes por realizar.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="window.location.assign('/paseos/verPaseosAdmin')">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        var myModal = new bootstrap.Modal(document.getElementById('miModal'));
+        myModal.show();
+        });
+      </script>
+    {% endif %}
     </div>
     <script src="/static/script.js"></script>
 </body>

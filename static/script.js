@@ -172,18 +172,6 @@ function seleccionarEsquema(elemento){
     }
 }
 
-function comprobantePago(elemento){
-
-    // Obtenemos los datos
-    let rutaInicial = 'data:image/jpeg;base64,';
-    let rutaImagen = elemento.getAttribute('data-python-variable');
-    let imagen = document.getElementById('imagenComprobante');
-    
-    // Actualizamos el src del modal 
-    imagen.setAttribute('src', rutaInicial + rutaImagen);
-
-}
-
 function completarDesembolso(elemento, fila){
     if (elemento.checked){ // Chequea la columna de completado
         

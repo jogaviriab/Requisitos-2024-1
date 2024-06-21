@@ -19,7 +19,7 @@ class Cliente(models.Model):
 
 
 class Chiva(models.Model):
-    placa = models.CharField(primary_key=True,max_length=100)
+    placa = models.CharField( max_length=100, unique=True )
     capacidad = models.IntegerField()
     estado = models.CharField(max_length=100)
     tipo = models.CharField(max_length=100)

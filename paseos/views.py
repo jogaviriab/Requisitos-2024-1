@@ -382,6 +382,11 @@ def desembolsos(request):
         else:
             listaDesembolsos = Desembolso.objects.filter(estado='completado')
             check = True
+
+        # Paginacion
+        paginator = Paginator(listaDesembolsos, 10)
+        pageNumber = request.GET.get('page')
+        objsDesembolso = paginator.get_page(pageNumber)
             
         if request.method == 'POST':
 
@@ -391,7 +396,7 @@ def desembolsos(request):
             # Comprobamos si el admin subió el comprobante de devolución
             if (comprobante): 
 
-                # Obtenemos el objecto desembolso para actualizar su estado y guardar el comprobante
+                # Obtenemos el objeto desembolso para actualizar su estado y guardar el comprobante
                 desembolso = Desembolso.objects.get(id=desembolsoID)
                 desembolso.estado = 'completado'
 
@@ -402,16 +407,24 @@ def desembolsos(request):
                 imagen_base64 = base64.b64encode(imagenContenido).decode('utf-8')
                 desembolso.comprobante = imagen_base64
 
+                #Actualizamos el estado de la reserva
+                reserva = desembolso.reserva
+                reserva.estado = 'desembolsada'
+
+                reserva.save()
                 desembolso.save()
 
                 messages.success(request, 'Desembolso realizado con éxito.')
-                return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+                return render(request, 'desembolsos.html', { 'listaDesembolsos': objsDesembolso, 'lista': lista,
+                'check': check})
             else:
                 messages.error(request, 'Debes subir el comprobante de devolución.')
-                return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+                return render(request, 'desembolsos.html', { 'listaDesembolsos': objsDesembolso, 'lista': lista,
+                'check': check})
 
         context = {
-            'listaDesembolsos': listaDesembolsos,
+            'listaDesembolsos': objsDesembolso,
+            'lista': lista,
             'check': check
         }
 

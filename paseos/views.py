@@ -331,7 +331,7 @@ def eliminarChiva(request, id):
     return redirect('../')
 
 def pagosAdmin(request):
-    pendientes = Reserva.objects.filter(estado="pendiente")
+    pendientes = Reserva.objects.filter(estado="pendientePago")
     confirmadas = Reserva.objects.filter(estado="confirmada")
 
     lista = request.GET.get('lista', 'confirmadas')
@@ -357,7 +357,7 @@ def pagosAdmin(request):
                 reservaElegida.estado = 'confirmada'
                 messages.success(request, f"Reserva No. {reservaElegida.id} confirmada")
             elif action == 'rechazar':
-                reservaElegida.estado = 'pendiente'
+                reservaElegida.estado = 'pendientePago'
                 messages.error(request, f"Reserva No. {reservaElegida.id} rechazada")
             reservaElegida.save()
         except Reserva.DoesNotExist:

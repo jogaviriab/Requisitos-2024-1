@@ -29,9 +29,15 @@
             {% if messages %}
             <div class="col-5 text-center">
                     {% for message in messages %}
-                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
-                        {{ message }}
-                    </div>
+                        {% if message.tags == 'success' %}
+                            <div class="alert alert-success alert-dismissible fade show">
+                                {{ message }}
+                            </div>
+                        {% elif message.tags == 'error' %}
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                {{ message }}
+                            </div>
+                        {% endif %}
                     {% endfor %}
             </div>
             {% endif %}
@@ -68,7 +74,7 @@
                         <form method="post" action=''>
                             {% csrf_token %}
                             <input type="hidden" name="reservaID" value="{{ reserva.id }}">
-                            {% if reserva.estado == 'pendiente' %}
+                            {% if reserva.estado == 'pendientePago' %}
                                 <button type="submit" name="action" value="confirmar" class="btn btn-primary me-2">Confirmar</button>
                             {% endif %}
                             <button type="submit" name="action" value="rechazar" class="btn btn-danger">Rechazar</button>

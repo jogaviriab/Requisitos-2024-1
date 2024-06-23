@@ -60,7 +60,7 @@ class Desembolso(models.Model):
     reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
     monto = models.IntegerField()
     motivo = models.CharField(max_length=500)
-    estado = models.CharField(max_length=100, default='pendiente')
+    estado = models.CharField(max_length=100)
     comprobante = models.CharField(max_length=200000, default='default_value')
 
 class AdministradorManager(BaseUserManager):

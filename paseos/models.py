@@ -61,7 +61,7 @@ class Desembolso(models.Model):
     monto = models.IntegerField()
     motivo = models.CharField(max_length=500)
     estado = models.CharField(max_length=100, default='pendiente')
-    comprobante = models.CharField(max_length=200000, default='default_value')
+    comprobante = models.CharField(max_length=200000, default='none')
 
 class AdministradorManager(BaseUserManager):
     def create_user(self, nombre, correo, celular, edad, rol, password=None, **extra_fields):

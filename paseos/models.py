@@ -52,7 +52,7 @@ class Reserva(models.Model):
     fechaCreacion = models.DateField()
     valor = models.IntegerField()
     paquete = models.ForeignKey(Paquete, on_delete=models.CASCADE)
-    comprobantePago = models.CharField(max_length=200000, default='default_value')
+    comprobantePago = models.CharField(max_length=200000, default='none')
     persona = models.ForeignKey(Cliente, on_delete=models.CASCADE)
 
 class Desembolso(models.Model):
@@ -110,3 +110,4 @@ class Administrador(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return self.is_staff
+    

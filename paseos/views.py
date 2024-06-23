@@ -345,6 +345,25 @@ def pagosAdmin(request):
 
     pageNumber = request.GET.get('page')
     objsReserva = paginator.get_page(pageNumber)
+
+    if request.method == "POST":
+        reservaID = request.POST.get('reservaID')
+        action = request.POST.get('action')
+
+        try:
+            reservaElegida = Reserva.objects.get(id=reservaID)
+
+            if action == 'confirmar':
+                reservaElegida.estado = 'confirmada'
+                messages.success(request, f"Reserva No. {reservaElegida.id} confirmada")
+            elif action == 'rechazar':
+                reservaElegida.estado = 'pendiente'
+                messages.error(request, f"Reserva No. {reservaElegida.id} rechazada")
+            reservaElegida.save()
+        except Reserva.DoesNotExist:
+            messages.error(request, 'No se ha encontrado la reserva.')
+        return redirect('pagosAdmin')
+    
     return render(request, 'pagosAdmin.html', {'listaReservas' : objsReserva,
                                                'lista' : lista})
 

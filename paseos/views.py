@@ -349,27 +349,57 @@ def pagosAdmin(request):
                                                'lista' : lista})
 
 def desembolsos(request):
-    listaDesembolsos = Desembolso.objects.all()
 
-    if request.method == 'POST':
-        
-        comprobante = request.FILES.get('comprobante')
-        
-        if (comprobante):
-            print('hola')
-            messages.success(request, 'Desembolso realizado con éxito.')  
-            return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
-        else:
-            print('hol')
-            messages.error(request, 'Debes subir el comprobante de devolución.')
-            return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
-            
+    # Verificamos si existen registros de desembolsos
     template = loader.get_template('desembolsos.html')
-    context = {
-        'listaDesembolsos': listaDesembolsos
-    }
 
-    return HttpResponse(template.render(context, request))
+    if (len(Desembolso.objects.all()) > 0):
 
-def confirmacionDesembolso():
-    print(1)
+        # Verificamos que lista se quiere
+        lista = request.GET.get('lista', 'pendientes')
+        if lista == 'pendientes':
+            listaDesembolsos = Desembolso.objects.filter(estado='pendiente')
+            check = False
+        else:
+            listaDesembolsos = Desembolso.objects.filter(estado='completado')
+            check = True
+            
+        if request.method == 'POST':
+
+            desembolsoID = request.POST.get('desembolsoID')
+            comprobante = request.FILES.get('comprobante')
+        
+            # Comprobamos si el admin subió el comprobante de devolución
+            if (comprobante): 
+
+                # Obtenemos el objecto desembolso para actualizar su estado y guardar el comprobante
+                desembolso = Desembolso.objects.get(id=desembolsoID)
+                desembolso.estado = 'completado'
+
+                # Codificamos la imagen
+                imagen_base64 = ''
+                imagenContenido = comprobante.read()
+                # Convertir el contenido de la imagen a una cadena Base64
+                imagen_base64 = base64.b64encode(imagenContenido).decode('utf-8')
+                desembolso.comprobante = imagen_base64
+
+                desembolso.save()
+
+                messages.success(request, 'Desembolso realizado con éxito.')
+                return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+            else:
+                messages.error(request, 'Debes subir el comprobante de devolución.')
+                return render(request, 'desembolsos.html', { 'listaDesembolsos': listaDesembolsos})
+
+        context = {
+            'listaDesembolsos': listaDesembolsos,
+            'check': check
+        }
+
+        return HttpResponse(template.render(context, request))
+    else:
+
+        context = {
+            'sinDesembolsos': True
+        }
+        return HttpResponse(template.render(context, request))

@@ -13,5 +13,4 @@ urlpatterns = [
     path('inicioSesionAdmin/', views.inicioSesionAdmin, name='inicioSesionAdmin' ),
     path('pagosAdmin/', views.pagosAdmin, name='pagosAdmin' ),
     path('desembolsos/', views.desembolsos, name='desembolsos'),
-    path('desembolsos/confirmacionDesembolso', views.confirmacionDesembolso, name='confirmacionDesembolsos')
 ]

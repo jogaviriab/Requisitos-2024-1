@@ -14,7 +14,6 @@ class Cliente(models.Model):
     celular = models.IntegerField()
     correo = models.EmailField()
     edad = models.IntegerField()
-    rol = models.CharField(max_length=100)
     cuentaBancaria = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE)
 
 class Chiva(models.Model):
@@ -60,6 +59,8 @@ class Desembolso(models.Model):
     reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)
     monto = models.IntegerField()
     motivo = models.CharField(max_length=500)
+    estado = models.CharField(max_length=100)
+    comprobante = models.CharField(max_length=200000, default='default_value')
 
 class AdministradorManager(BaseUserManager):
     def create_user(self, nombre, correo, celular, edad, rol, password=None, **extra_fields):

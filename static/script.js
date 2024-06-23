@@ -172,7 +172,7 @@ function seleccionarEsquema(elemento){
     }
 }
 
-function completarDesembolso(elemento, fila){
+function completarDesembolso(elemento){
     if (elemento.checked){ // Chequea la columna de completado
         
         //Obtenemos el token CSRF
@@ -189,10 +189,11 @@ function completarDesembolso(elemento, fila){
         }
 
         // Obtenemos el comprobante
-        let comprobantes = document.getElementsByName('comprobante');
-        let comprobante = comprobantes[fila - 1].files[0]; 
+        let id = elemento.getAttribute('name');
+        let comprobante = document.getElementsByName('comprobante' + id)[0].files[0]
         const formData = new FormData();
         formData.append('comprobante', comprobante);
+        formData.append('desembolsoID', id);
         
         //Lanzamos una solicitud POST
         fetch(window.location.href, {
@@ -201,6 +202,12 @@ function completarDesembolso(elemento, fila){
                 'X-CSRFToken': cookieValue
             },
             body: formData
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.open();
+            document.write(html);
+            document.close();
         })
         .catch(error => console.error('Error:', error));
     }

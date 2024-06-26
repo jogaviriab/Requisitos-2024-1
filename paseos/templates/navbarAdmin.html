@@ -15,23 +15,23 @@
               Paseos
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="../verPaseosAdmin">Mis paseos</a></li>
-              <li><a class="dropdown-item" href="../registrarPaseo">Registrar Paseo</a></li>
+              <li><a class="dropdown-item" href="{% url 'verPaseosAdmin' %}">Mis paseos</a></li>
+              <li><a class="dropdown-item" href="{% url 'registrarPaseo' %}">Registrar Paseo</a></li>
             </ul>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="../chivas/">Chivas</a>
+            <a class="nav-link" href="{% url 'chivas' %}">Chivas</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Paquetes</a>
+            <a class="nav-link" href="{% url 'paquetes' %}">Paquetes</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Pagos
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="../pagosAdmin/">Pagos</a></li>
-              <li><a class="dropdown-item" href="../desembolsos/">Desembolsos</a></li>
+              <li><a class="dropdown-item" href="{% url 'pagosAdmin' %}">Pagos</a></li>
+              <li><a class="dropdown-item" href="{% url 'desembolsos' %}">Desembolsos</a></li>
             </ul>
           </li>
 

@@ -13,10 +13,11 @@ import base64
 
 from . forms import ChivaForm
 from . forms import PaseoForm
-
+from . forms import PaqueteForm
 
 from .models import Administrador
 from .models import Chiva
+from .models import Paquete
 from .models import Paseo
 from .models import EsquemaCobro
 from .models import Reserva
@@ -238,6 +239,8 @@ def paseoAdmin(request, id):
     }
     return HttpResponse(template.render(context, request))
 
+# Registro de una chiva
+
 def chivas(request):
     listaChivas = Chiva.objects.all()
 
@@ -248,24 +251,55 @@ def chivas(request):
         chivaTipo = request.POST.get("tipo")
         chivaEstado = request.POST.get("estado")
         
-        print(type(chivaCapacidad))
+        # Verificación de que no este registrada la placa
 
+        if  Chiva.objects.filter(placa = chivaPlaca ).exists():
+            messages.error(request, 'La placa de la chiva ya se encuentra registrada.')
+            return render(request, 'chivas.html', {
+                'listaChivas': listaChivas, 
+                'chivaPlaca' : chivaPlaca, 
+                'chivaCapacidad' : chivaCapacidad,
+                'chivaTipo' : chivaTipo, 
+                'chivaEstado' : chivaEstado })
+        
+        # Verificación tipo de chiva elegido en el formulario
 
-       
         if (chivaTipo == 'Normal') or (chivaTipo =='Rumbera'):
             pass
         else:
             messages.error(request, 'Tipo de chiva no válido.')
-            return render(request, 'chivas.html', {'listaChivas': listaChivas, 'chivaPlaca' : chivaPlaca, 'chivaCapacidad' : chivaCapacidad })
+            return render(request, 'chivas.html', {
+                'listaChivas': listaChivas, 
+                'chivaPlaca' : chivaPlaca, 
+                'chivaCapacidad' : chivaCapacidad,
+                'chivaTipo' : chivaTipo, 
+                'chivaEstado' : chivaEstado })
         
+        # Verificación estado de chiva elegido en el formulario
+
+        if (chivaEstado == 'Disponible') or (chivaEstado =='No Disponible'):
+            pass
+        else:
+            messages.error(request, 'Estado de chiva no válido.')
+            return render(request, 'chivas.html', {
+                'listaChivas': listaChivas, 
+                'chivaPlaca' : chivaPlaca, 
+                'chivaCapacidad' : chivaCapacidad, 
+                'chivaTipo' : chivaTipo,
+                'chivaEstado' : chivaEstado
+                 })    
+
+        # Registro exitoso de la chiva
 
         if form.is_valid():
             form.save()
-            messages.success(request, 'Chiva guardada con exito')
-            # return HttpResponse('Chiva guardada')
+            messages.success(request, 'Chiva registrada con éxito')
+        else:
+            print(form.errors)  
+            messages.error(request, 'Error al registrar la chiva.')
+           
     else:
         form = ChivaForm()
-
 
     template = loader.get_template('chivas.html')
     context = {
@@ -275,38 +309,46 @@ def chivas(request):
     }
     return HttpResponse(template.render(context, request))
 
+# Actualización de los daros de una chiva
+
 def actualizarFormChiva(request, id):
     chiva = get_object_or_404(Chiva, pk=id)
+    listaChivas = Chiva.objects.all()
+    paseoChiva = None
+
+    # Chivas asociadas a un paseo 
+
+    try:
+        paseoChiva = Paseo.objects.get(chiva_id=id)
+    except ObjectDoesNotExist:
+        pass
 
     if request.method == 'POST':
         chivaPlaca = request.POST.get("placa")
         chivaCapacidad = request.POST.get("capacidad")
-        print( request.POST.get("tipo"))
         chivaTipo = request.POST.get("tipo")
         chivaEstado = request.POST.get("estado")
-        
+
         chiva.placa = chivaPlaca
         chiva.capacidad = chivaCapacidad
         chiva.tipo = chivaTipo
         chiva.estado = chivaEstado
+
+        # La modificación de la placa no puede ser por una ya existente 
+
+        if  Chiva.objects.filter(placa = chiva.placa ).exclude(pk=id).exists():
+                messages.error(request, 'La placa de la chiva ya se encuentra registrada.')
+                return render(request, 'chivas.html', {
+                    'listaChivas': listaChivas, 
+                    'actualizacion': chiva,
+                    'paseoChiva': paseoChiva})
+        
         chiva.save()
 
         messages.success(request, 'Chiva actualizada con éxito')
         return redirect('chivas')
     else:
-        form = ChivaForm(instance=chiva)
-
-    paseoChiva = None
-    try:
-        paseoChiva = Paseo.objects.get(chiva_id=id)
-        print(paseoChiva.id)
-    except ObjectDoesNotExist:
-        pass
-        
-        # messages.error(request,"Por favor seleccione una chiva válida.")
-    
-
-    listaChivas = Chiva.objects.all()
+        form = ChivaForm(instance=chiva) 
 
     context = {
         'listaChivas': listaChivas,
@@ -322,6 +364,8 @@ def eliminarChiva(request, id):
     except Chiva.DoesNotExist:
         return messages.error('Chiva no encontrada')
     
+    # Las chivas asociadas a un paseo no pueden ser eliminadas 
+
     if Paseo.objects.filter(chiva_id=id).exists():
         messages.error(request, 'Error al eliminar la chiva, esta se encuentra asociada a un paseo')
     else:
@@ -329,6 +373,90 @@ def eliminarChiva(request, id):
         messages.warning(request, 'Chiva eliminada con éxito')
   
     return redirect('../')
+
+# Registro de un paquete 
+
+def paquetes(request):
+    listaPaquetes = Paquete.objects.all()
+    
+
+    if request.method == 'POST':
+        form = PaqueteForm(request.POST)
+        paqueteNombre = request.POST.get("nombre")
+        paqueteDescripcion = request.POST.get("descripcion")
+        paqueteValor = request.POST.get("valor")
+        
+        
+        # Registro exitoso de la Paquete
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Paquete registrado con éxito')
+        else:
+            print(form.errors)  
+            messages.error(request, 'Error al registrar el paquete.')
+           
+    else:
+        form = PaqueteForm()
+
+    template = loader.get_template('paquetes.html')
+    context = {
+        'listaPaquetes': listaPaquetes,
+        'form': form,
+        'actualización': None
+    }
+    return HttpResponse(template.render(context, request))
+
+#  
+
+def actualizarFormPaquete(request, id):
+    paquete = get_object_or_404(Paquete, pk=id)
+    listaPaquetes = Paquete.objects.all()
+    
+
+    if request.method == 'POST':
+        paqueteNombre = request.POST.get("nombre")
+        paqueteDescripcion = request.POST.get("descripcion")
+        paqueteValor = request.POST.get("valor")
+
+        paquete.nombre = paqueteNombre
+        paquete.descripcion = paqueteDescripcion
+        paquete.valor = paqueteValor
+        
+        paquete.save()
+
+        messages.success(request, 'Paquete actualizado con éxito')
+        return redirect('paquetes')
+    else:
+        form = PaqueteForm(instance=paquete) 
+
+   
+    context = {
+        'listaPaquetes': listaPaquetes,
+        'form': form,
+        'actualizacion': paquete,
+        
+    }
+    return render(request, 'paquetes.html', context)
+
+def eliminarPaquete(request, id):
+
+    try:
+        paquete = Paquete.objects.get(pk=id)
+    except Paquete.DoesNotExist:
+        return messages.error('Paquete no encontrado')
+    
+    # Los paquetes asociados a una reserva no pueden ser eliminados
+
+    if Reserva.objects.filter(paquete_id=id).exists():
+        messages.error(request, 'Error al eliminar el Paquete, este se encuentra asociado a un reserva')
+    else:
+        paquete.delete()
+        messages.warning(request, 'Paquete eliminado con éxito')
+  
+    return redirect('../')
+
+
 
 def pagosAdmin(request):
     pendientes = Reserva.objects.filter(estado="pendientePago")

@@ -172,9 +172,21 @@ function seleccionarEsquema(elemento){
     }
 }
 
-function completarDesembolso(elemento){
+function confirmarDesembolso(elemento){
     if (elemento.checked){ // Chequea la columna de completado
-        
+
+        // Confirmacion del desembolso
+        var myModal = new bootstrap.Modal(document.getElementById('confirmacion'+elemento.getAttribute('data-python-variable')));
+        myModal.show();
+    }
+}
+
+function completarDesembolso(elemento){
+
+    // ID del desembolso
+    let id = elemento.getAttribute('data-python-variable');
+
+    if (elemento.value === 'confirmar'){
         //Obtenemos el token CSRF
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -189,7 +201,6 @@ function completarDesembolso(elemento){
         }
 
         // Obtenemos el comprobante
-        let id = elemento.getAttribute('name');
         let comprobante = document.getElementsByName('comprobante' + id)[0].files[0]
         const formData = new FormData();
         formData.append('comprobante', comprobante);
@@ -210,5 +221,8 @@ function completarDesembolso(elemento){
             document.close();
         })
         .catch(error => console.error('Error:', error));
+
+    } else if (elemento.value === 'cancelar'){
+        document.getElementsByName(id)[0].checked = false;
     }
 }

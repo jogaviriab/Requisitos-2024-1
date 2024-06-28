@@ -133,3 +133,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AUTH_USER_MODEL = 'paseos.Administrador'
+
+# Configuracion de email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'chivastravel2024@gmail.com'
+EMAIL_HOST_PASSWORD = 'ytoy ctid cmuk spye'

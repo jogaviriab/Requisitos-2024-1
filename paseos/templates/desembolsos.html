@@ -104,7 +104,7 @@
                         {% if check %}
                         <input name="{{desembolso.id}}" id="cbx-12" type="checkbox" checked disabled>
                         {% else %}
-                        <input name="{{desembolso.id}}" id="cbx-12" type="checkbox" onchange="completarDesembolso(this)">
+                        <input name="{{desembolso.id}}" id="cbx-12" type="checkbox" onchange="confirmarDesembolso(this)" data-python-variable="{{desembolso.id}}">
                         {% endif %}
                         <label for="cbx-12"></label>
                         <svg width="15" height="14" viewBox="0 0 15 14" fill="none">
@@ -133,6 +133,7 @@
                     </div>
                   </td>
                 </tr>
+                {% include 'modalDeConfir.html' with desembolso=desembolso %}
                 {% include 'modal.html' with reserva=desembolso.reserva %}
                 {% if check %}
                   {% include 'modalDesembolsos.html' with desembolso=desembolso %}

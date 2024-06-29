@@ -5,8 +5,11 @@ from django.template import loader
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.core.mail import EmailMultiAlternatives
+from email.mime.image import MIMEImage
 
 from datetime import datetime, timedelta
+
 
 import base64
 
@@ -22,6 +25,7 @@ from .models import Paseo
 from .models import EsquemaCobro
 from .models import Reserva
 from .models import Desembolso
+from chivasTravel import settings
 
 # Create your views here.
 def index(request):
@@ -309,7 +313,7 @@ def chivas(request):
     }
     return HttpResponse(template.render(context, request))
 
-# Actualización de los daros de una chiva
+# Actualización de los datos de una chiva
 
 def actualizarFormChiva(request, id):
     chiva = get_object_or_404(Chiva, pk=id)
@@ -520,7 +524,7 @@ def desembolsos(request):
 
             desembolsoID = request.POST.get('desembolsoID')
             comprobante = request.FILES.get('comprobante')
-        
+    
             # Comprobamos si el admin subió el comprobante de devolución
             if (comprobante): 
 
@@ -542,7 +546,34 @@ def desembolsos(request):
                 reserva.save()
                 desembolso.save()
 
-                messages.success(request, 'Desembolso realizado con éxito.')
+                # Notificamos por correo electronico
+                email = desembolso.reserva.persona.correo
+                templateEmail = loader.get_template('emailDesembolso.html')
+                try:
+                    paquete = desembolso.reserva.paquete.nombre
+                except:
+                    paquete = desembolso.reserva.paquete
+
+                content = templateEmail.render({'motivo': desembolso.motivo, 'monto': desembolso.monto,
+                'cliente': desembolso.reserva.persona.nombre, 'id': desembolso.reserva.persona.id, 'correo': desembolso.reserva.persona.correo,
+                'celular': desembolso.reserva.persona.celular, 'cuenta': f'{desembolso.reserva.persona.cuentaBancaria.numCuenta} - {desembolso.reserva.persona.cuentaBancaria.tipoCuente}',
+                'entidad': desembolso.reserva.persona.cuentaBancaria.entidadBancaria, 'paseo': f'{desembolso.reserva.paseo.origen} - {desembolso.reserva.paseo.destino}', 
+                'fecha': desembolso.reserva.fechaCreacion, 'paquete': paquete, 'valor': desembolso.reserva.valor})
+
+                msg = EmailMultiAlternatives(
+                    'Notificación de desembolso',
+                    'Hemos desembolsado tu dinero.',
+                    settings.EMAIL_HOST_USER,
+                    [email]
+                )
+                msg.attach_alternative(content, 'text/html')
+                #Adjuntar la imagen
+                img = MIMEImage(imagenContenido)
+                img.add_header('Content-Disposition', 'attachment', filename=f'ComprobanteDesembolso{desembolso.reserva.persona.id}')
+                msg.attach(img)
+                msg.send()
+
+                messages.success(request, 'Desembolso realizado con éxito. El cliente ha sido informado del proceso por correo electrónico.')
                 return render(request, 'desembolsos.html', { 'listaDesembolsos': objsDesembolso, 'lista': lista,
                 'check': check})
             else:

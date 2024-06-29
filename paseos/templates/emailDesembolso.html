@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email</title>
+</head>
+
+<body>
+    <header>
+        <div style="color: rgba(255, 255, 255, 1) !important;margin-bottom: 0.5rem !important; padding: 1rem !important; margin-left: 15%; margin-right: 15%; background-color: rgba(33, 37, 41, 1) !important;">
+            <p style="text-align: center !important; font-weight: 700 !important; font-size: calc(1.325rem + 0.9vw) !important;"> Notificación de Desembolso </p>
+        </div>
+    </header> 
+
+    <div style="margin-left: 15%; margin-right: 15%; border-color: #212529; border-width: 5px; border-style: solid;">
+        <div style="margin-left: 10%; margin-right: 10%;">
+            <br>
+                <p style="line-height: 1.25 !important; font-size: 20px; color: black;"> Te notificamos que Chivas Travel ha realizado el desembolso por motivo de {{motivo}}.</p>
+            </br>
+        
+            <br>
+                <p style="line-height: 1.25 !important; font-size: 20px; color: black;"> El monto total devuelto es de {{monto}} COP.</p>
+            </br>
+        </div>
+
+        <div style="margin-left: 10%; margin-right: 10%;">
+            <br>
+                <p style="text-align: center !important; font-weight: 700 !important; font-size: calc(1.325rem + 0.9vw) !important; color: black;"> Detalles del cliente </p>
+            </br>
+
+            <!-- Tabla cliente -->
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table style="caption-side: bottom; border-collapse: collapse; border-color: rgba(0, 0, 0, 1) !important; width: 100%; margin-bottom: 1rem; vertical-align: top;">
+                    <thead style="border-color: #e9ecef !important; color: #fff; border-style: solid; border-width: 0;">
+                        <tr style="border-width: 1px 0; border-color: inherit; border-style: solid;">
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Cliente 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Número de documento 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Celular 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Correo 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Cuenta Bancaria 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;">  
+                            Entidad Bancaria 
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody style="border-color: inherit; border-style: solid; border-width: 0;">
+                        <tr style="border-width: 1px 0; border-color: inherit; border-style: solid;">
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{cliente}} 
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{id}} 
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{celular}} 
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{correo}}
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{cuenta}} 
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{entidad}} 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <br>
+                <p style="text-align: center !important; font-weight: 700 !important; font-size: calc(1.325rem + 0.9vw) !important; color: black;"> Detalles de la reserva </p>
+            </br>
+
+            <!-- Tabla reserva -->
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                <table style="caption-side: bottom; border-collapse: collapse; border-color: rgba(0, 0, 0, 1) !important; width: 100%; margin-bottom: 1rem; vertical-align: top;">
+                    <thead style="border-color: #e9ecef !important; color: #fff; border-style: solid; border-width: 0;">
+                        <tr style="border-width: 1px 0; border-color: inherit; border-style: solid;">
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Paseo 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Fecha creación 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Paquete 
+                            </th>
+                            <th style="border-width: 0 1px; padding: 0.5rem 0.5rem; background-color: #212529; border-color: inherit; border-style: solid;"> 
+                            Valor 
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody style="border-color: inherit; border-style: solid; border-width: 0;">
+                        <tr style="border-width: 1px 0; border-color: inherit; border-style: solid;">
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{paseo}}
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{fecha}} 
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{paquete}} 
+                            </td>
+                            <td style="border-width: 0 1px; padding: 0.5rem 0.5rem; border-color: inherit; border-style: solid;"> 
+                            {{valor}} 
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="margin-left: 10%; margin-right: 10%;">
+            <br>
+                <p style="line-height: 1.25 !important; font-size: 20px; color: black;"> Te anexamos el comprobante de devolución.</p>
+            </br>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!-- Modal -->
+<div class="modal fade" id="confirmacion{{desembolso.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmación Desembolso</h1>
+        </div>
+        <div class="modal-body">
+        ¿ Deseas confirmar el desembolso de {{desembolso.reserva.persona.nombre}}, identificado con número de documento {{desembolso.reserva.persona.id}} ?
+        </div>
+        <div class="modal-footer">
+          <button type="button" value = 'cancelar' class="btn btn-danger" data-bs-dismiss="modal" onclick="completarDesembolso(this)" data-python-variable = {{desembolso.id}}>Cancelar</button>
+          <button type="button" value = 'confirmar' class="btn btn-success" data-bs-dismiss="modal" onclick="completarDesembolso(this)" data-python-variable = {{desembolso.id}}>Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>

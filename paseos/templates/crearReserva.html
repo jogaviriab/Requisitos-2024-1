@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <title>Crear Reserva</title>
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">  
+
+</head>
+<body>
+    <header>
+        {% include 'navbarCliente.html' %}
+        <p class="fs-2 fw-bold text-center m-0">Selecciona tu Paseo</p>
+    </header>
+    <div class="container">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for paseo in listaPaseos %}
+                <div class="col">
+                    <div class="card" style="max-width: 400px; max-height: 415px;">
+                        <img src="data:image/jpeg;base64,{{ paseo.imagen }}" class="card-img-top" alt="..." style="width: 100%; max-height: 230px;">
+                        <div class="card-body">
+                            <h5 class="card-title">De {{ paseo.origen }} a {{ paseo.destino }}</h5>
+                            <p class="card-text">
+                                Fecha: {{ paseo.fecha|date:"d b Y" }} {{ paseo.hora }}<br>
+                                Disponibilidad: {{ paseo.disponibilidad }}<br>
+                                {{ paseo.descripcion|truncatechars:93 }}.
+                            </p>
+                            <button class="btn btn-primary reservar-btn" data-id="{{ paseo.id }}">Reservar</button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal for reservation form -->
+    <div class="modal" id="reservaModal" tabindex="-1" aria-labelledby="reservaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reservaModalLabel">Crear Reserva</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reserva-form">
+                        <input type="hidden" id="paseo-id" name="paseo_id">
+                        <div class="mb-3">
+                            <label for="identificacion" class="form-label">Identificación</label>
+                            <input type="text" class="form-control" id="identificacion" name="identificacion" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombres" class="form-label">Nombres</label>
+                            <input type="text" class="form-control" id="nombres" name="nombres" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="apellidos" class="form-label">Apellidos</label>
+                            <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="celular" class="form-label">Celular</label>
+                            <input type="tel" class="form-control" id="celular" name="celular" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edad" class="form-label">Edad</label>
+                            <input type="number" class="form-control" id="edad" name="edad" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cuenta" class="form-label">No. Cuenta</label>
+                            <input type="text" class="form-control" id="cuenta" name="cuenta" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="entidad_bancaria" class="form-label">Entidad Bancaria</label>
+                            <input type="text" class="form-control" id="entidad_bancaria" name="entidad_bancaria" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Guardar reserva</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const reservaModal = new bootstrap.Modal(document.getElementById('reservaModal'));
+            const reservaForm = document.getElementById('reserva-form');
+            const paseoIdInput = document.getElementById('paseo-id');
+
+            document.querySelectorAll('.reservar-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    paseoIdInput.value = event.target.dataset.id;
+                    reservaModal.show();
+                });
+            });
+
+            reservaForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(reservaForm);
+                fetch('{% url "crearReserva" %}', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        reservaModal.hide();
+                        alert('Reserva creada con éxito');
+                    } else {
+                        alert('Error al crear la reserva');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</body>
+</html>

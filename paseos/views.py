@@ -219,6 +219,7 @@ def registrarPaseo(request):
 def verPaseosAdmin(request):
     listaPaseos =  Paseo.objects.all()
     template = loader.get_template('verPaseosAdmin.html')
+
     context = {
         'listaPaseos': listaPaseos,
     }
@@ -230,6 +231,8 @@ def paseoAdmin(request, id):
         chiva = Chiva.objects.get(pk=paseo.chiva.id)
         esquema = EsquemaCobro.objects.get(pk=paseo.esquemaCobro.id)
         listaReservas = paseo.reserva_set.all()
+        # for reserva in listaReservas:
+        #     reserva.persona_id= reserva.persona
 
     except Paseo.DoesNotExist:
         return messages.error(request,'Paseo no encontrado')
@@ -240,6 +243,7 @@ def paseoAdmin(request, id):
         'chiva': chiva,
         'esquema': esquema,
         'listaReservas': listaReservas,
+
     }
     return HttpResponse(template.render(context, request))
 

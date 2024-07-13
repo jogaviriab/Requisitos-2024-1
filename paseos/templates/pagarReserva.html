@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagar Reserva</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}"> 
+</head>
+
+<body>
+    {% include 'navbarCliente.html' %}
+
+    <div class="container mt-5">
+        <h1>Pagar Reserva</h1>
+        <!-- Formulario de pago -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="id_comprobantePago">Comprobante de Pago:</label>
+                <p><br><p>
+                {{ form.comprobantePago.errors }}
+                {{ form.comprobantePago }}
+                <small class="form-text text-muted">Sube una imagen del comprobante en formato JPG o PNG.</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Pagar</button>
+        </form>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Asegúrate de tener la referencia a Bootstrap JS en tu proyecto -->
+</body>
+</html>

@@ -18,4 +18,5 @@ urlpatterns = [
     path('desembolsos/', views.desembolsos, name='desembolsos'),
     path('crearReserva/', views.crearReserva, name='crearReserva'),
     path('misReservas/', views.misReservas, name='misReservas'),
+    path('pagarReserva/<int:reservaId>/', views.pagarReserva, name='pagarReserva'),
 ]

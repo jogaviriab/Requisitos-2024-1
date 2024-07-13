@@ -604,7 +604,13 @@ from .models import Paseo, Cliente, CuentaBancaria
 
 @csrf_exempt
 def crearReserva(request):
-    if request.method == 'POST':
+    listaPaseos = Paseo.objects.all()
+    context = {'listaPaseos': listaPaseos}
+    return render(request, 'crearReserva.html', context)
+
+@csrf_exempt
+def misReservas(request):
+     if request.method == 'POST':
         identificacion = request.POST.get('identificacion')
         nombres = request.POST.get('nombres')
         apellidos = request.POST.get('apellidos')
@@ -639,12 +645,4 @@ def crearReserva(request):
         cliente.save()
 
         return JsonResponse({'success': True})
-
-    listaPaseos = Paseo.objects.all()
-    context = {'listaPaseos': listaPaseos}
-    return render(request, 'crearReserva.html', context)
-
-def misReservas(request):
-    template = loader.get_template('misReservas.html')
-    context = {}
-    return HttpResponse(template.render(context, request))
+     return render(request, 'misReservas.html')

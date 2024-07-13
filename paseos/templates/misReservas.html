@@ -1,17 +1,104 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
-    <title>Crear Reserva</title>
+    <title>Reservar Paseo</title>
     <link rel="stylesheet" href="{% static '/styles.css' %}">
     <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">  
-
+    <style>
+        .container {
+      display: flex;
+      flex-direction: column;
+    }
+    .container .row {
+      display: flex;
+      flex-direction: row;
+    }
+    .card {
+      width: 100%; /* Adjust the width as needed */
+      /* Add a background color here if you want for the gray area */
+      border: 1px solid lightgray; /* Optional for border */
+      margin-bottom: 10px; /* Optional margin */
+    }
+    </style>
 </head>
 <body>
     <header>
         {% include 'navbarCliente.html' %}
-        <p class="fs-2 fw-bold text-center m-0">Reservas Activas</p>
     </header>
+    <div class="container">
+        <h2 class="text-center">Reservar Paseo</h2>
+        <a href="{% url 'crearReserva' %}" class="btn btn-secondary mb-3">Volver</a>
+        <div class="row">
+            <div class="col-md-4">
+                <img src="data:image/jpeg;base64,{{ paseo.imagen }}" class="img-fluid" alt="Imagen del paseo">
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">De {{ paseo.origen }} a {{ paseo.destino }}</h5>
+                        <p class="card-text">
+                            Fecha: {{ paseo.fecha|date:"d b Y" }}<br>
+                            Hora: {{ paseo.hora }}<br>
+                            Disponibilidad: {{ paseo.disponibilidad }}<br>
+                            {{ paseo.descripcion }}<br>
+                        </p>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'crearReserva' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="paseo_id" value="{{ paseo.id }}">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="identificacion" class="form-label">Identificación:</label>
+                            <input type="text" class="form-control" id="identificacion" name="identificacion" required>
+                        </div>
+                        <div class="col">
+                            <label for="edad" class="form-label">Edad:</label>
+                            <input type="number" class="form-control" id="edad" name="edad" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="nombre" class="form-label">Nombre:</label>
+                            <input type="text" class="form-control" id="nombre" name="nombres" required>
+                        </div>
+                        <div class="col">
+                            <label for="apellido" class="form-label">Apellido:</label>
+                            <input type="text" class="form-control" id="apellido" name="apellidos" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="celular" class="form-label">Celular:</label>
+                        <input type="tel" class="form-control" id="celular" name="celular" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo:</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="numCuenta" class="form-label">No. Cuenta:</label>
+                            <input type="text" class="form-control" id="numCuenta" name="numCuenta" required>
+                        </div>
+                        <div class="col">
+                            <label for="tipoCuente" class="form-label">Tipo de Cuenta:</label>
+                            <input type="text" class="form-control" id="tipoCuente" name="tipoCuente" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="entidadBancaria" class="form-label">Entidad Bancaria:</label>
+                        <input type="text" class="form-control" id="entidadBancaria" name="entidadBancaria" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Guardar Reserva</button>
+                    <button type="button" class="btn btn-primary">Pagar ahora</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'scripts.js' %}"></script>
 </body>
+</html>

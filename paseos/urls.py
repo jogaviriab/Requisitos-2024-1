@@ -16,4 +16,6 @@ urlpatterns = [
     path('inicioSesionAdmin/', views.inicioSesionAdmin, name='inicioSesionAdmin' ),
     path('pagosAdmin/', views.pagosAdmin, name='pagosAdmin' ),
     path('desembolsos/', views.desembolsos, name='desembolsos'),
+    path('crearReserva/', views.crearReserva, name='crearReserva'),
+    path('misReservas/', views.misReservas, name='misReservas'),
 ]

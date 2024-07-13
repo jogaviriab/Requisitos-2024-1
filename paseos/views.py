@@ -594,3 +594,16 @@ def desembolsos(request):
             'sinDesembolsos': True
         }
         return HttpResponse(template.render(context, request))
+    
+def crearReserva(request):
+    listaPaseos =  Paseo.objects.all()
+    template = loader.get_template('crearReserva.html')
+    context = {
+        'listaPaseos': listaPaseos,
+    }
+    return HttpResponse(template.render(context, request))
+
+def misReservas(request):
+    template = loader.get_template('misReservas.html')
+    context = {}
+    return HttpResponse(template.render(context, request))

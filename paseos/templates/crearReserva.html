@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="{% static '/styles.css' %}">
     <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">  
-
 </head>
 <body>
     <header>
@@ -36,7 +35,7 @@
         </div>
     </div>
 
-    <!-- Modal for reservation form -->
+    <!-- ventana emergente del formulario de reserva -->
     <div class="modal" id="reservaModal" tabindex="-1" aria-labelledby="reservaModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -45,7 +44,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="reserva-form">
+                    <form id="reserva-form" method="post">
+                        {% csrf_token %}
                         <input type="hidden" id="paseo-id" name="paseo_id">
                         <div class="mb-3">
                             <label for="identificacion" class="form-label">Identificación</label>
@@ -64,16 +64,24 @@
                             <input type="tel" class="form-control" id="celular" name="celular" required>
                         </div>
                         <div class="mb-3">
+                            <label for="correo" class="form-label">Correo</label>
+                            <input type="email" class="form-control" id="correo" name="correo" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="edad" class="form-label">Edad</label>
                             <input type="number" class="form-control" id="edad" name="edad" required>
                         </div>
                         <div class="mb-3">
-                            <label for="cuenta" class="form-label">No. Cuenta</label>
-                            <input type="text" class="form-control" id="cuenta" name="cuenta" required>
+                            <label for="numCuenta" class="form-label">No. Cuenta</label>
+                            <input type="text" class="form-control" id="numCuenta" name="numCuenta" required>
                         </div>
                         <div class="mb-3">
-                            <label for="entidad_bancaria" class="form-label">Entidad Bancaria</label>
-                            <input type="text" class="form-control" id="entidad_bancaria" name="entidad_bancaria" required>
+                            <label for="tipoCuente" class="form-label">Tipo de Cuenta</label>
+                            <input type="text" class="form-control" id="tipoCuente" name="tipoCuente" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="entidadBancaria" class="form-label">Entidad Bancaria</label>
+                            <input type="text" class="form-control" id="entidadBancaria" name="entidadBancaria" required>
                         </div>
                         <button type="submit" class="btn btn-success">Guardar reserva</button>
                     </form>
@@ -98,8 +106,13 @@
             reservaForm.addEventListener('submit', (event) => {
                 event.preventDefault();
                 const formData = new FormData(reservaForm);
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
                 fetch('{% url "crearReserva" %}', {
                     method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
                     body: formData,
                 })
                 .then(response => response.json())

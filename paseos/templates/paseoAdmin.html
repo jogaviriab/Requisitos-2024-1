@@ -8,14 +8,63 @@
     <link rel="stylesheet" href="{% static '/styles.css' %}">
 
     <title>Ver Paseo</title>
+    
 </head>
 <body>
     {% include 'navbarAdmin.html '%}
     <div class="container-xxxl text-center" style="margin: 20px;">
-            <div class="row row-cols-1 ">
-              <div id="imagenIzq" class="col-4" style=" margin-bottom: 20px;">
-                <img src="data:image/jpeg;base64,{{ paseo.imagen }}" alt="..." class="rounded " style="max-width: max-content;">
-              </div>
+            <div class="row row-cols-1 text-center">
+              <div id="imagenIzq" class="col-4" >
+                <div id="{{ paseo.id }}" class="card-img-top">
+                    <div id="carousel{{ paseo.id }}" class="carousel slide" style="display: none;">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active" id="img-carrusel-0"></div>
+                            <div class="carousel-item" id="img-carrusel-1"></div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="prev" style="color: black;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+                                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"/>
+                              </svg>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="next" style="color: black;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0M4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5z"/>
+                              </svg>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                
+                    <script>
+                        document.addEventListener('DOMContentLoaded', (event) => {
+                            var imgString = "{{ paseo.imagen }}";
+                            var imgParts = imgString.split('-');
+                
+                            if (imgParts.length > 2) {
+                                imgParts.forEach((part, index) => {
+                                    if (part === '') return;
+                                    document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                    var imgElement = document.createElement('img');
+                                    imgElement.src = 'data:image/jpeg;base64,' + part;
+                                    imgElement.style.width = '400px';
+                                    imgElement.style.height = '300px';
+                                    document.getElementById('img-carrusel-' + index).appendChild(imgElement);
+                                });
+                            } else {
+                                imgParts.forEach((part, index) => {
+                                    if (part === '') return;
+                                    var imgElement = document.createElement('img');
+                                    imgElement.src = 'data:image/jpeg;base64,' + part;
+                                    imgElement.style.width = '400px';
+                                    imgElement.style.height = '300px';
+                                    document.getElementById('{{ paseo.id }}').appendChild(imgElement);
+                                });
+                            }
+                        });
+                    </script>
+                </div>
+                </div>
+                
               <div id="infoDere" class="col-8">
                 <div class="border rounded">
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3  " style="margin-top: 20px; margin-bottom: 20px;">
@@ -115,15 +164,15 @@
                         <tbody>
                             {% for reserva in listaReservas %}
                                 <tr>
-                                    <td>{{ paseo.origen }}</td>
-                                    <td>{{ paseo.origen }}</td>
-                                    <td>{{ paseo.origen }}</td>
-                                    <td>{{ paseo.origen }}</td>
-                                    <td>
-
-                                    </td>
+                                    <td>{{ reserva.persona.nombre }}</td>
+                                    <td>{{ reserva.persona.id }}</td>
+                                    <td>{{ reserva.persona.edad }}</td>
+                                    <td>{{ reserva.persona.celular }}</td>
+                                    <td>{{ reserva.estado }}</td>
                                 </tr>
                             {% endfor %}
+
+
                         </tbody>
                       </table>
               </div>

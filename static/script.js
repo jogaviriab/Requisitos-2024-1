@@ -226,3 +226,40 @@ function completarDesembolso(elemento){
         document.getElementsByName(id)[0].checked = false;
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const reservaModal = new bootstrap.Modal(document.getElementById('reservaModal'));
+    const reservaForm = document.getElementById('reserva-form');
+    const paseoIdInput = document.getElementById('paseo-id');
+
+    document.querySelectorAll('.reservar-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            paseoIdInput.value = event.target.dataset.id;
+            reservaModal.show();
+        });
+    });
+
+    reservaForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(reservaForm);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('{% url "crearReserva" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                reservaModal.hide();
+                alert('Reserva creada con éxito');
+            } else {
+                alert('Error al crear la reserva');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});

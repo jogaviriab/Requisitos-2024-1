@@ -15,6 +15,7 @@ class Cliente(models.Model):
     correo = models.EmailField()
     edad = models.IntegerField()
     cuentaBancaria = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE)
+    rol = models.CharField(max_length=50, default='cliente')
 
 class Chiva(models.Model):
     placa = models.CharField(max_length=100, unique=True)

@@ -18,9 +18,75 @@
             <div class="row row-cols-1 row-cols-md-3 g-4">
                 {% for paseo in listaPaseos %}
                     <div class="col">
-                        <a  href="{% url 'paseoAdmin' paseo.id %}" style="text-decoration: none;">
-                            <div class="card" style="max-width: 400px; max-height: 415px ;">
-                                <img src="data:image/jpeg;base64,{{ paseo.imagen }}" class="card-img-top" alt="..." style="width: 100%; max-height: 230px;">
+                        <a href="{% url 'paseoAdmin' paseo.id %}" style="text-decoration: none;">
+                            <div class="card" style="max-width: 402px; max-height: 515px ;">
+                                <div id="{{paseo.id}}" class="card-img-top" >
+                                    <div id="carousel{{ paseo.id }}" class="carousel slide" style="display: none;">
+                                        <div class="carousel-inner" id="inner{{paseo.id}}">
+                                          
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="prev">
+                                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                          <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="next">
+                                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                          <span class="visually-hidden">Next</span>
+                                        </button>
+                                      </div>
+
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', (event) => {
+                                        // Asumiendo que {{ img }} es una variable del contexto de Django que contiene el string base64
+                                        var imgString = "{{ paseo.imagen }}";
+                                        var imgParts = imgString.split('-');
+                            
+                                        // Ahora puedes hacer lo que necesites con imgParts, que es un array de los segmentos divididos
+                                        // console.log(imgParts); // Solo para demostración, muestra los segmentos en la consola
+                                        // console.log(imgString)
+                                        // Ejemplo de cómo usar los segmentos\
+                                        if(imgParts.length > 2){
+                                            imgParts.forEach((part, index) => {
+                                                if(part == '') return;
+                                                document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                                var divElement = document.createElement('div');
+                                                if(index == 0){
+                                                    divElement.className = 'carousel-item active';
+                                                }else{
+                                                    divElement.className = 'carousel-item';
+                                                }
+
+
+                                                var imgElement = document.createElement('img');
+                                                imgElement.src = 'data:image/jpeg;base64,' + part;
+                                                imgElement.style.width = '400px';
+                                                imgElement.style.height = '300px';
+                                                divElement.appendChild(imgElement);
+                                                document.getElementById('inner{{paseo.id}}').appendChild(divElement);
+
+                                            });
+                                        }else{
+                                            imgParts.forEach((part, index) => {
+                                                if(part == '') return;
+                                                // Aquí puedes, por ejemplo, crear elementos img para cada parte
+                                                // Asegúrate de tener un contenedor con id 'imagesContainer' en tu HTML
+                                                var imgElement = document.createElement('img');
+                                                imgElement.src = 'data:image/jpeg;base64,' + part;
+                                                imgElement.style.width = '400px'; // Establece el ancho a 500px
+                                                imgElement.style.height = '300px';  
+                                                document.getElementById('{{ paseo.id }}').appendChild(imgElement);
+                                            });
+                                        }
+
+
+
+                                        
+
+                                    });
+                                </script>
+                                </div>
+                                    <!-- <img src="data:image/jpeg;base64,{ img }" class="card-img-top" alt="..." style="width: 100%; max-height: 230px;"> -->
                                 <div class="card-body">
                                     <h5 class="card-title">De {{ paseo.origen}} a {{ paseo.destino }}</h5>
                                     <p class="card-text">Fecha: {{ paseo.fecha|date:"d b Y" }} {{ paseo.hora }}<br>

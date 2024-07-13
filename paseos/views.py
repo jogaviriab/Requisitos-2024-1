@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from paseos.backends import AdminAuthentication
 from django.template import loader
@@ -18,7 +18,7 @@ from . forms import ChivaForm
 from . forms import PaseoForm
 from . forms import PaqueteForm
 
-from .models import Administrador
+from .models import Administrador, CuentaBancaria
 from .models import Chiva
 from .models import Paquete
 from .models import Paseo
@@ -219,6 +219,7 @@ def registrarPaseo(request):
 def verPaseosAdmin(request):
     listaPaseos =  Paseo.objects.all()
     template = loader.get_template('verPaseosAdmin.html')
+
     context = {
         'listaPaseos': listaPaseos,
     }
@@ -230,6 +231,8 @@ def paseoAdmin(request, id):
         chiva = Chiva.objects.get(pk=paseo.chiva.id)
         esquema = EsquemaCobro.objects.get(pk=paseo.esquemaCobro.id)
         listaReservas = paseo.reserva_set.all()
+        # for reserva in listaReservas:
+        #     reserva.persona_id= reserva.persona
 
     except Paseo.DoesNotExist:
         return messages.error(request,'Paseo no encontrado')
@@ -240,6 +243,7 @@ def paseoAdmin(request, id):
         'chiva': chiva,
         'esquema': esquema,
         'listaReservas': listaReservas,
+
     }
     return HttpResponse(template.render(context, request))
 
@@ -594,14 +598,51 @@ def desembolsos(request):
             'sinDesembolsos': True
         }
         return HttpResponse(template.render(context, request))
-    
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Paseo, Cliente, CuentaBancaria
+
+@csrf_exempt
 def crearReserva(request):
-    listaPaseos =  Paseo.objects.all()
-    template = loader.get_template('crearReserva.html')
-    context = {
-        'listaPaseos': listaPaseos,
-    }
-    return HttpResponse(template.render(context, request))
+    if request.method == 'POST':
+        identificacion = request.POST.get('identificacion')
+        nombres = request.POST.get('nombres')
+        apellidos = request.POST.get('apellidos')
+        celular = request.POST.get('celular')
+        correo = request.POST.get('correo')
+        edad = request.POST.get('edad')
+        numCuenta = request.POST.get('numCuenta')
+        tipoCuente = request.POST.get('tipoCuente')
+        entidadBancaria = request.POST.get('entidadBancaria')
+        paseo_id = request.POST.get('paseo_id')
+        
+        paseo = Paseo.objects.get(id=paseo_id)
+
+        cuenta_bancaria, created = CuentaBancaria.objects.get_or_create(
+            numCuenta=numCuenta,
+            defaults={'tipoCuente': tipoCuente, 'entidadBancaria': entidadBancaria}
+        )
+        if not created:
+            cuenta_bancaria.tipoCuente = tipoCuente
+            cuenta_bancaria.entidadBancaria = entidadBancaria
+            cuenta_bancaria.save()
+
+        cliente = Cliente(
+            id=identificacion,
+            nombre=f"{nombres} {apellidos}",
+            celular=celular,
+            correo=correo,
+            edad=edad,
+            cuentaBancaria=cuenta_bancaria,
+            rol='cliente'
+        )
+        cliente.save()
+
+        return JsonResponse({'success': True})
+
+    listaPaseos = Paseo.objects.all()
+    context = {'listaPaseos': listaPaseos}
+    return render(request, 'crearReserva.html', context)
 
 def misReservas(request):
     template = loader.get_template('misReservas.html')

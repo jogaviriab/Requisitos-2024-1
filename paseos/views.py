@@ -17,6 +17,7 @@ import base64
 from . forms import ChivaForm
 from . forms import PaseoForm
 from . forms import PaqueteForm
+from .forms import PagarReservaForm
 
 from .models import Administrador
 from .models import Chiva
@@ -27,6 +28,44 @@ from .models import Reserva
 from .models import Desembolso
 from chivasTravel import settings
 
+#CLIENTE
+# pág principal (jose)
+def misReservas(request):
+    if request.method == 'POST':
+        identificacion = request.POST.get('identificacion')
+        if not identificacion:
+            messages.error(request, "Debe ingresar un número de identificación válido.")
+            return redirect('misReservas')
+        
+        reservas = Reserva.objects.filter(cliente_identificacion=identificacion)
+        if not reservas:
+            messages.error(request, "No se encontraron reservas asociadas a este número de identificación.")
+            return redirect('misReservas')
+        
+        return render(request, 'misReservas.html', {'reservas': reservas})
+    
+    return render(request, 'misReservas.html')
+
+def pagarReserva(request, reservaId):
+    reserva = get_object_or_404(Reserva, id=reservaId)
+
+    if request.method == 'POST':
+        form = PagarReservaForm(request.POST, request.FILES, instance=reserva)
+        if form.is_valid():
+            form.save()
+            reserva.estado = 'Pendiente de comprobación'
+            reserva.save()
+            messages.success(request, 'El comprobante de pago ha sido enviado correctamente. Está pendiente de comprobación.')
+            return redirect('misReservas')  # Redirigir a misReservas después de pagar
+        else:
+            messages.error(request, 'Por favor, adjunte un comprobante de pago válido.')
+    else:
+        form = PagarReservaForm(instance=reserva)
+
+    return render(request, 'pagarReserva.html', {'form': form, 'reserva': reserva})
+
+
+#ADMIN
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the Paseos index.")
@@ -219,6 +258,7 @@ def registrarPaseo(request):
 def verPaseosAdmin(request):
     listaPaseos =  Paseo.objects.all()
     template = loader.get_template('verPaseosAdmin.html')
+
     context = {
         'listaPaseos': listaPaseos,
     }
@@ -230,6 +270,8 @@ def paseoAdmin(request, id):
         chiva = Chiva.objects.get(pk=paseo.chiva.id)
         esquema = EsquemaCobro.objects.get(pk=paseo.esquemaCobro.id)
         listaReservas = paseo.reserva_set.all()
+        # for reserva in listaReservas:
+        #     reserva.persona_id= reserva.persona
 
     except Paseo.DoesNotExist:
         return messages.error(request,'Paseo no encontrado')
@@ -240,6 +282,7 @@ def paseoAdmin(request, id):
         'chiva': chiva,
         'esquema': esquema,
         'listaReservas': listaReservas,
+
     }
     return HttpResponse(template.render(context, request))
 

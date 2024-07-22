@@ -249,8 +249,13 @@ def paseoAdmin(request, id):
 
 # Registro de una chiva
 
+
 def chivas(request):
     listaChivas = Chiva.objects.all()
+    pag = Paginator(listaChivas, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     if request.method == 'POST':
         form = ChivaForm(request.POST)
@@ -264,6 +269,7 @@ def chivas(request):
         if  Chiva.objects.filter(placa = chivaPlaca ).exists():
             messages.error(request, 'La placa de la chiva ya se encuentra registrada.')
             return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
                 'listaChivas': listaChivas, 
                 'chivaPlaca' : chivaPlaca, 
                 'chivaCapacidad' : chivaCapacidad,
@@ -275,8 +281,9 @@ def chivas(request):
         if (chivaTipo == 'Normal') or (chivaTipo =='Rumbera'):
             pass
         else:
-            messages.error(request, 'Tipo de chiva no válido.')
+            messages.error(request, 'Tipo de chiva no válido. Selecciona una opción válida por favor')
             return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
                 'listaChivas': listaChivas, 
                 'chivaPlaca' : chivaPlaca, 
                 'chivaCapacidad' : chivaCapacidad,
@@ -288,8 +295,9 @@ def chivas(request):
         if (chivaEstado == 'Disponible') or (chivaEstado =='No Disponible'):
             pass
         else:
-            messages.error(request, 'Estado de chiva no válido.')
+            messages.error(request, 'Estado de chiva no válido. Selecciona una opción válida por favor')
             return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
                 'listaChivas': listaChivas, 
                 'chivaPlaca' : chivaPlaca, 
                 'chivaCapacidad' : chivaCapacidad, 
@@ -311,6 +319,7 @@ def chivas(request):
 
     template = loader.get_template('chivas.html')
     context = {
+        'pag_obj': pag_obj,
         'listaChivas': listaChivas,
         'form': form,
         'actualización': None
@@ -323,6 +332,10 @@ def actualizarFormChiva(request, id):
     chiva = get_object_or_404(Chiva, pk=id)
     listaChivas = Chiva.objects.all()
     paseoChiva = None
+    pag = Paginator(listaChivas, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     # Chivas asociadas a un paseo 
 
@@ -347,6 +360,7 @@ def actualizarFormChiva(request, id):
         if  Chiva.objects.filter(placa = chiva.placa ).exclude(pk=id).exists():
                 messages.error(request, 'La placa de la chiva ya se encuentra registrada.')
                 return render(request, 'chivas.html', {
+                    'pag_obj': pag_obj,
                     'listaChivas': listaChivas, 
                     'actualizacion': chiva,
                     'paseoChiva': paseoChiva})
@@ -359,6 +373,7 @@ def actualizarFormChiva(request, id):
         form = ChivaForm(instance=chiva) 
 
     context = {
+        'pag_obj': pag_obj,
         'listaChivas': listaChivas,
         'form': form,
         'actualizacion': chiva,
@@ -386,7 +401,10 @@ def eliminarChiva(request, id):
 
 def paquetes(request):
     listaPaquetes = Paquete.objects.all()
-    
+    pag = Paginator(listaPaquetes, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     if request.method == 'POST':
         form = PaqueteForm(request.POST)
@@ -409,6 +427,7 @@ def paquetes(request):
 
     template = loader.get_template('paquetes.html')
     context = {
+        'pag_obj': pag_obj,
         'listaPaquetes': listaPaquetes,
         'form': form,
         'actualización': None
@@ -420,7 +439,11 @@ def paquetes(request):
 def actualizarFormPaquete(request, id):
     paquete = get_object_or_404(Paquete, pk=id)
     listaPaquetes = Paquete.objects.all()
-    
+ 
+    pag = Paginator(listaPaquetes, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     if request.method == 'POST':
         paqueteNombre = request.POST.get("nombre")
@@ -440,6 +463,7 @@ def actualizarFormPaquete(request, id):
 
    
     context = {
+        'pag_obj': pag_obj,
         'listaPaquetes': listaPaquetes,
         'form': form,
         'actualizacion': paquete,

@@ -11,10 +11,41 @@
 </head>
 <body>
     {% include "navbarAdmin.html" %}
-    <p class="fs-2 fw-bold text-center">Paseos</p>
+    <p class="fs-2 fw-bold text-center">Paseos {{lista}}</p>
+   
     <div class="container">
-<!--         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3">
-            -->
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% elif message.tags == 'error' %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+        
+                    {% elif message.tags == 'warning' %}
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <div class="btn-group mt-2 mb-2">
+            <button type="button" class="btn btn-secondary">Estado</button>
+            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+            <li><a class="dropdown-item {% if lista == 'activos' %}active{% endif %}" href="?lista=activos">Activos</a></li>
+            <li><a class="dropdown-item {% if lista == 'antiguos' %}active{% endif %}" href="?lista=antiguos">Antiguos</a></li>
+        </div>
             <div class="row row-cols-1 row-cols-md-3 g-4">
                 {% for paseo in listaPaseos %}
                     <div class="col">
@@ -41,7 +72,8 @@
                                         // Asumiendo que {{ img }} es una variable del contexto de Django que contiene el string base64
                                         var imgString = "{{ paseo.imagen }}";
                                         var imgParts = imgString.split('-');
-                            
+                                        console.log(imgParts);
+                                        console.log(imgString);
                                         // Ahora puedes hacer lo que necesites con imgParts, que es un array de los segmentos divididos
                                         // console.log(imgParts); // Solo para demostración, muestra los segmentos en la consola
                                         // console.log(imgString)

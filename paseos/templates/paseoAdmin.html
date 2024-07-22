@@ -13,6 +13,29 @@
 <body>
     {% include 'navbarAdmin.html '%}
     <div class="container-xxxl text-center" style="margin: 20px;">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% elif message.tags == 'error' %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+    
+                {% elif message.tags == 'warning' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
             <div class="row row-cols-1 text-center">
               <div id="imagenIzq" class="col-4" >
                 <div id="{{ paseo.id }}" class="card-img-top">
@@ -20,6 +43,8 @@
                         <div class="carousel-inner">
                             <div class="carousel-item active" id="img-carrusel-0"></div>
                             <div class="carousel-item" id="img-carrusel-1"></div>
+                            <div class="carousel-item" id="img-carrusel-2"></div>
+
                         </div>
                         <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="prev" style="color: black;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
@@ -125,8 +150,12 @@
                                 <strong>Aumento:</strong> {{esquema.descuento}}
                             </div>
                         {% endif %}
+                        
 
                       </div>
+                </div>
+                <div class="border rounded" style="margin-top: 40px;">
+                    <div class="col"><strong>Descripción:</strong> {{paseo.descripcion}}</div>
                 </div>
               </div>
             </div>
@@ -134,13 +163,106 @@
                 <div id="botonesIzq" class="col-4">
                     <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2  " style="margin-top: 20px; margin-bottom: 20px;">
                         <div class="col">
-                            <a type="button" class="btn btn-success" >
+                            {% if paseo.fecha > hoy %}
+                            <a type="button" class="btn btn-success" data-bs-target="#modificarPaseo" data-bs-toggle="modal">
                                 Modificar Paseo
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"></path></svg>
                             </a>
+                            <!-- Modal -->
+                            <div class="modal fade" id="modificarPaseo" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modificar Paseo</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                        <div class="input-group mb-2">
+                                            <span class="input-group-text" id="inputGroup-sizing-default">Origen</span>
+                                            <input disabled name='origen' type="text" class="form-control" value="{{paseo.origen}}" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                                            
+                                            <span class="input-group-text" id="inputGroup-sizing-default">Fecha</span>
+                                            <input name='fecha' value="{{paseo.fecha|date:'Y-m-d' }}" type="date" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                                        </div>
+                                        <div class="input-group mb-1">
+                                            <span class="input-group-text" id="inputGroup-sizing-default">Chiva</span>
+                                            <select name="chiva" id="chivasDisponibles" class="form-select">
+                                                <option value="{{ paseo.chiva.placa}}" selected>{{ paseo.chiva.placa}} - {{ paseo.chiva.tipo }} - {{ paseo.chiva.capacidad }} cupos</option>
+                                                {% for chiva in listaChivas %}
+                                                {% if chiva.placa == placaChiva%}
+                                                <option value="{{ chiva.placa }}" selected>{{ chiva.placa}} - {{ chiva.tipo }} - {{ chiva.capacidad }} cupos</option>
+                                                {% else %}
+                                                <option value="{{ chiva.placa }}">{{ chiva.placa}} - {{ chiva.tipo }} - {{ chiva.capacidad }} cupos</option>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text" id="inputGroup-sizing-default">Destino</span>
+                                            <input disabled name='destino' value="{{ paseo.destino}}" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                                
+                                            <span class="input-group-text" id="inputGroup-sizing-default">Hora</span>
+                                            <input name='hora' value="{{paseo.hora}}" type="time" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                                        </div>
+                                
+                                        <div class="input-group">
+                                            <span class="input-group-text">Descripción</span>
+                                            <textarea name='descripcion' class="form-control" aria-label="With textarea" required>{{paseo.descripcion}}</textarea>
+                                        </div>
+                                        </br>
+                                        
+                                        <br>
+                                        <p class="fs-5 fw-bold">Esquema de cobro</p>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text" id="inputGroup-sizing-default">Tipo costo</span>
+                                            <select disabled name="esquema" id="inputState" class="form-select" onchange="seleccionarEsquema(this)">
+                                                <option selected >{{esquema.tipo}}</option>
+                                            </select>                      
+                                            <span class="input-group-text" id="inputGroup-sizing-default">Valor</span>
+                                            <input disabled name='valor' value="{{esquema.valor}}" id="valor" type="number" min="0" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                                        </div>
+                                        <div class="input-group mb-3">
+                                
+                                            {% if esquema.tipo == Volumen%}
+                                                <span class="input-group-text" id="esquema">Punto Equilibrio</span>
+                                                <input disabled name='equilibrio'value='{{esquema.puntoEquilibrio}}' type="number" min='0' class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                        
+                                                <span class="input-group-text" id="esquema2">Descuento</span>
+                                                <input name='descuento' value='{{esquema.descuento}}' type="number" min='0' class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default">
+                                            
+                                            {% else%}
+                                                <span class="input-group-text" id="esquema">Fecha Aumento</span>
+                                                <input disabled name='fechaAumento' value="{{esquema.fechaAumento|date:'Y-m-d'}}" type="date" class="form-control" id='esquema1' aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                        
+                                                <span class="input-group-text" id="esquema2">Valor Aumento</span>
+                                                <input disabled name='aumento' value="{{esquema.valorAumento}}" type="number" min='0' class="form-control" id="esquema3" aria-describedby="inputGroup-sizing-default">
+                                            
+                                            {% endif %}
+                                        </div>
+                                        </br>
+                                
+
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary"  >Guardar Cambios</button>
+                                    </form>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <a type="button" class="btn btn-success disabled">
+                                Modificar Paseo
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"></path></svg>
+                            </a>
+                            {% endif %}
                         </div>
                         <div class="col">
-                            <a type="button" class="btn btn-outline-danger" href="{% url 'verPaseosAdmin' %}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"></path><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"></path></svg>
+                            <a type="button" class="btn btn-outline-danger" href="{% url 'eliminarPaseo' paseo.id %}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"></path><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"></path></svg>
                                 Eliminar Paseo
                             </a>
                       </div>
@@ -171,10 +293,35 @@
                                     <td>{{ reserva.estado }}</td>
                                 </tr>
                             {% endfor %}
-
-
                         </tbody>
                       </table>
+                      <div class="pagination-wrapper">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center custom-cursor">
+                                {% if listaReservas.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?lista={{ lista }}&page={{ listaReservas.previous_page_number }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                {% for num in listaReservas.paginator.page_range %}
+                                    {% if listaReservas.number == num %}
+                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                    {% elif num > listaReservas.number|add:'-3' and num < listaReservas.number|add:'3' %}
+                                        <li class="page-item"><a class="page-link" href="?lista={{ lista }}&page={{ num }}">{{ num }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if listaReservas.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?lista={{ lista }}&page={{ listaReservas.next_page_number }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
               </div>
             
 

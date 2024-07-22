@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core.mail import EmailMultiAlternatives
 from email.mime.image import MIMEImage
+from django.utils.timezone import now
 
 from datetime import datetime, timedelta
 
@@ -187,7 +188,7 @@ def registrarPaseo(request):
             imagen_base64 += "-"
         
         if imagen3:
-            imagenContenido = imagen2.read()
+            imagenContenido = imagen3.read()
             # Convertir el contenido de la imagen a una cadena Base64
             imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
             imagen_base64 += "-"
@@ -217,13 +218,41 @@ def registrarPaseo(request):
     return HttpResponse(template.render(context, request))
 
 def verPaseosAdmin(request):
-    listaPaseos =  Paseo.objects.all()
+
+    antiguos = Paseo.objects.filter(fecha__lt=now().date())
+    activos = Paseo.objects.filter(fecha__gte=now().date())
+
+    lista = request.GET.get('lista', 'activos')
+
+    if lista == 'antiguos':
+        listaPaseos = antiguos
+    else:
+        listaPaseos = activos
+
     template = loader.get_template('verPaseosAdmin.html')
 
     context = {
         'listaPaseos': listaPaseos,
+        'lista': lista,
     }
     return HttpResponse(template.render(context, request))
+
+def eliminarPaseo(request, id):
+    try:
+        paseo = Paseo.objects.get(pk=id)
+    except Paseo.DoesNotExist:
+        return messages.error('Paseo no encontrado')
+    
+    paseo.chiva.estado = 'Disponible'
+    paseo.chiva.save()
+    
+    # Las paseos asociadas a un paseo no pueden ser eliminadas 
+
+    paseo.delete()
+    messages.success(request, 'Paseo eliminado con éxito')
+  
+    return redirect('verPaseosAdmin')
+
 
 def paseoAdmin(request, id):
     try:
@@ -231,6 +260,11 @@ def paseoAdmin(request, id):
         chiva = Chiva.objects.get(pk=paseo.chiva.id)
         esquema = EsquemaCobro.objects.get(pk=paseo.esquemaCobro.id)
         listaReservas = paseo.reserva_set.all()
+        hoy =now().date()
+        paginator = Paginator(listaReservas, 10)
+
+        pageNumber = request.GET.get('page')
+        objsReserva = paginator.get_page(pageNumber)
         # for reserva in listaReservas:
         #     reserva.persona_id= reserva.persona
 
@@ -238,14 +272,42 @@ def paseoAdmin(request, id):
         return messages.error(request,'Paseo no encontrado')
 
     template = loader.get_template('paseoAdmin.html')
+
+    # Cuando se modifica un paseo
+    if request.method == 'POST':
+        fecha = request.POST.get('fecha')
+        chiva = request.POST.get('chiva')
+        hora = request.POST.get('hora')
+        descripcion = request.POST.get('descripcion')
+
+        # Modificación paseo
+        paseo.fecha = fecha
+        paseo.hora = hora
+        paseo.descripcion = descripcion
+        # Comprobando si la chiva seleccionada es la misma
+        if paseo.chiva.placa != chiva:
+            chiva = Chiva.objects.get(placa=chiva)
+            paseo.chiva.estado = 'Disponible'
+            paseo.chiva = chiva
+            paseo.chiva.estado = 'No Disponible'
+            chiva.save()
+            paseo.chiva.save()
+    
+        paseo.save()
+        messages.success(request, 'Paseo modificado con éxito')
+        return redirect('paseoAdmin', id=id)
+
     context = {
         'paseo': paseo,
         'chiva': chiva,
         'esquema': esquema,
-        'listaReservas': listaReservas,
+        'listaReservas': objsReserva,
+        'hoy': hoy,
 
     }
     return HttpResponse(template.render(context, request))
+
+
 
 # Registro de una chiva
 

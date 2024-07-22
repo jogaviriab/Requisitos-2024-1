@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancelar Reserva</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    {% include 'navbarCliente.html' %}
+    <div class="container mt-5">
+        <h1>Cancelar Reserva</h1>
+
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        {% if messages %}
+            <div class="alert alert-danger" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="list-group">
+            <div class="list-group-item">
+                <h5 class="mb-1">{{ reserva.paseo.origen }} - {{ reserva.paseo.destino }}</h5>
+                <p class="mb-1">Fecha: {{ reserva.paseo.fecha }}</p>
+                <p class="mb-1">Hora: {{ reserva.paseo.hora }}</p>
+                <p class="mb-1">Estado: {{ reserva.estado }}</p>
+                <form method="POST" class="form-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirmar Cancelación</button>
+                    <a href="{% url 'consultarReserva'%}" class="btn btn-danger">Volver</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

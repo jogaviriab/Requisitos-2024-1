@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Paseo</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">
+</head>
+<body>
+    {% include 'navbarCliente.html' %}
+
+    <div class="container mt-5">
+        <h1>Reservar Paseo</h1>
+
+        {% if messages %}
+            <div class="alert alert-success" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <h2>Paseo seleccionado</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
+                <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
+                <p class="card-text">Descripción: {{ paseo.descripcion }}</p>
+                <p class="card-text">Fecha: {{ paseo.fecha }}</p>
+                <p class="card-text">Hora: {{ paseo.hora }}</p>
+                <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
+            </div>
+        </div>
+
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        {% if error_cliente %}
+            <div class="alert alert-danger" role="alert">
+                <ul>
+                {% for field, errors in error_cliente.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if error_cuenta_bancaria %}
+            <div class="alert alert-danger" role="alert">
+                <ul>
+                {% for field, errors in error_cuenta_bancaria.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if error_reserva %}
+            <div class="alert alert-danger" role="alert">
+                <ul>
+                {% for field, errors in error_reserva.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <h2>Buscar o Ingresar Datos del Cliente</h2>
+        <form method="POST" id="buscarClienteForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="cliente_id">ID del Cliente</label>
+                <input type="text" name="cliente_id" id="cliente_id" class="form-control" value="{{ request.POST.cliente_id }}">
+            </div>
+            <button type="submit" name="buscar_cliente" class="btn btn-primary">Buscar Cliente</button>
+        </form>
+
+        {% if cliente_form %}
+            <h2>Datos del Cliente y Reserva</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="paseo_id" value="{{ paseo.id }}">
+                <input type="hidden" name="cliente_id" value="{{ cliente_form.instance.id }}">
+
+                <div class="form-group">
+                    {{ cliente_form.id.label_tag }} {{ cliente_form.id }}
+                </div>
+                <div class="form-group">
+                    {{ cliente_form.nombre.label_tag }} {{ cliente_form.nombre }}
+                </div>
+                <div class="form-group">
+                    {{ cliente_form.celular.label_tag }} {{ cliente_form.celular }}
+                </div>
+                <div class="form-group">
+                    {{ cliente_form.correo.label_tag }} {{ cliente_form.correo }}
+                </div>
+                <div class="form-group">
+                    {{ cliente_form.edad.label_tag }} {{ cliente_form.edad }}
+                </div>
+                <div class="form-group">
+                    {{ cuenta_bancaria_form.numCuenta.label_tag }} {{ cuenta_bancaria_form.numCuenta }}
+                </div>
+                <div class="form-group">
+                    {{ cuenta_bancaria_form.tipoCuente.label_tag }} {{ cuenta_bancaria_form.tipoCuente }}
+                </div>
+                <div class="form-group">
+                    {{ cuenta_bancaria_form.entidadBancaria.label_tag }} {{ cuenta_bancaria_form.entidadBancaria }}
+                </div>
+                {% if paseo.chiva.tipo == "Rumbera" %}
+                    <div class="form-group">
+                        <label for="paquete">Paquete:</label>
+                        <select id="paquete" name="paquete">
+                            <option value="">No seleccionar</option>
+                            {% for paquete in paquetes %}
+                                <option value="{{ paquete.id }}" {% if paquete.id == cliente_form.instance.paquete.id %}selected{% endif %}>{{ paquete.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">Guardar Reserva</button>
+            </form>
+        {% endif %}
+
+        <a href="{% url 'crearReserva'%}" class="btn btn-danger">Volver</a>
+
+    </div>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

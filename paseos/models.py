@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
+from django.utils import timezone
 
 
 
@@ -17,6 +19,8 @@ class Cliente(models.Model):
     correo = models.EmailField()
     edad = models.IntegerField()
     cuentaBancaria = models.ForeignKey(CuentaBancaria, on_delete=models.CASCADE)
+    rol = models.CharField(max_length=50, default='cliente')  # Campo rol agregado
+
 
 class Chiva(models.Model):
     placa = models.CharField(max_length=100, unique=True)
@@ -53,9 +57,27 @@ class Reserva(models.Model):
     estado = models.CharField(max_length=100)
     fechaCreacion = models.DateField()
     valor = models.IntegerField()
-    paquete = models.ForeignKey(Paquete, on_delete=models.CASCADE)
-    comprobantePago = models.CharField(max_length=200000, default='none')
+    paquete = models.ForeignKey(Paquete, on_delete=models.CASCADE, default='none')
+    comprobantePago = models.FileField(upload_to='comprobantes/', default='none')
     persona = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    
+    def can_be_cancelled(self):
+        paseo_datetime = datetime.combine(self.paseo.fecha, self.paseo.hora)
+        current_datetime = timezone.now()
+        paseo_datetime = timezone.make_aware(paseo_datetime, timezone.get_current_timezone())
+        cancel_deadline = paseo_datetime - timedelta(hours=72)
+        return current_datetime <= cancel_deadline
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Si la reserva es nueva, reduce la disponibilidad
+            self.paseo.disponibilidad -= 1
+            self.paseo.save()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.paseo.disponibilidad += 1  # Al cancelar la reserva, aumenta la disponibilidad
+        self.paseo.save()
+        super().delete(*args, **kwargs)
 
 class Desembolso(models.Model):
     reserva = models.ForeignKey(Reserva, on_delete=models.CASCADE)

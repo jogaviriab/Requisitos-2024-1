@@ -17,4 +17,8 @@ urlpatterns = [
     path('pagosAdmin/', views.pagosAdmin, name='pagosAdmin' ),
     path('desembolsos/', views.desembolsos, name='desembolsos'),
     path('pagarReserva/<int:reservaId>/', views.pagarReserva, name='pagarReserva'),
+    path('consultarReserva/', views.consultarReserva, name='consultarReserva'),
+    path('crearReserva/', views.crearReserva, name='crearReserva'),  
+    path('reservarPaseo/<int:paseo_id>/', views.reservarPaseo, name='reservarPaseo'),
+    path('cancelarReserva/<int:reserva_id>/', views.cancelarReserva, name='cancelarReserva'),
 ]

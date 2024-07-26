@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from email.mime.image import MIMEImage
+from django.utils.timezone import now
 
 from datetime import datetime, timedelta
 
@@ -454,7 +455,7 @@ def registrarPaseo(request):
             imagen_base64 += "-"
         
         if imagen3:
-            imagenContenido = imagen2.read()
+            imagenContenido = imagen3.read()
             # Convertir el contenido de la imagen a una cadena Base64
             imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
             imagen_base64 += "-"
@@ -484,13 +485,41 @@ def registrarPaseo(request):
     return HttpResponse(template.render(context, request))
 
 def verPaseosAdmin(request):
-    listaPaseos =  Paseo.objects.all()
+
+    antiguos = Paseo.objects.filter(fecha__lt=now().date())
+    activos = Paseo.objects.filter(fecha__gte=now().date())
+
+    lista = request.GET.get('lista', 'activos')
+
+    if lista == 'antiguos':
+        listaPaseos = antiguos
+    else:
+        listaPaseos = activos
+
     template = loader.get_template('verPaseosAdmin.html')
 
     context = {
         'listaPaseos': listaPaseos,
+        'lista': lista,
     }
     return HttpResponse(template.render(context, request))
+
+def eliminarPaseo(request, id):
+    try:
+        paseo = Paseo.objects.get(pk=id)
+    except Paseo.DoesNotExist:
+        return messages.error('Paseo no encontrado')
+    
+    paseo.chiva.estado = 'Disponible'
+    paseo.chiva.save()
+    
+    # Las paseos asociadas a un paseo no pueden ser eliminadas 
+
+    paseo.delete()
+    messages.success(request, 'Paseo eliminado con éxito')
+  
+    return redirect('verPaseosAdmin')
+
 
 def paseoAdmin(request, id):
     try:
@@ -498,6 +527,11 @@ def paseoAdmin(request, id):
         chiva = Chiva.objects.get(pk=paseo.chiva.id)
         esquema = EsquemaCobro.objects.get(pk=paseo.esquemaCobro.id)
         listaReservas = paseo.reserva_set.all()
+        hoy =now().date()
+        paginator = Paginator(listaReservas, 10)
+
+        pageNumber = request.GET.get('page')
+        objsReserva = paginator.get_page(pageNumber)
         # for reserva in listaReservas:
         #     reserva.persona_id= reserva.persona
 
@@ -505,19 +539,52 @@ def paseoAdmin(request, id):
         return messages.error(request,'Paseo no encontrado')
 
     template = loader.get_template('paseoAdmin.html')
+
+    # Cuando se modifica un paseo
+    if request.method == 'POST':
+        fecha = request.POST.get('fecha')
+        chiva = request.POST.get('chiva')
+        hora = request.POST.get('hora')
+        descripcion = request.POST.get('descripcion')
+
+        # Modificación paseo
+        paseo.fecha = fecha
+        paseo.hora = hora
+        paseo.descripcion = descripcion
+        # Comprobando si la chiva seleccionada es la misma
+        if paseo.chiva.placa != chiva:
+            chiva = Chiva.objects.get(placa=chiva)
+            paseo.chiva.estado = 'Disponible'
+            paseo.chiva = chiva
+            paseo.chiva.estado = 'No Disponible'
+            chiva.save()
+            paseo.chiva.save()
+    
+        paseo.save()
+        messages.success(request, 'Paseo modificado con éxito')
+        return redirect('paseoAdmin', id=id)
+
     context = {
         'paseo': paseo,
         'chiva': chiva,
         'esquema': esquema,
-        'listaReservas': listaReservas,
+        'listaReservas': objsReserva,
+        'hoy': hoy,
 
     }
     return HttpResponse(template.render(context, request))
 
+
+
 # Registro de una chiva
+
 
 def chivas(request):
     listaChivas = Chiva.objects.all()
+    pag = Paginator(listaChivas, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     if request.method == 'POST':
         form = ChivaForm(request.POST)
@@ -531,6 +598,7 @@ def chivas(request):
         if  Chiva.objects.filter(placa = chivaPlaca ).exists():
             messages.error(request, 'La placa de la chiva ya se encuentra registrada.')
             return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
                 'listaChivas': listaChivas, 
                 'chivaPlaca' : chivaPlaca, 
                 'chivaCapacidad' : chivaCapacidad,
@@ -542,8 +610,9 @@ def chivas(request):
         if (chivaTipo == 'Normal') or (chivaTipo =='Rumbera'):
             pass
         else:
-            messages.error(request, 'Tipo de chiva no válido.')
+            messages.error(request, 'Tipo de chiva no válido. Selecciona una opción válida por favor')
             return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
                 'listaChivas': listaChivas, 
                 'chivaPlaca' : chivaPlaca, 
                 'chivaCapacidad' : chivaCapacidad,
@@ -555,8 +624,9 @@ def chivas(request):
         if (chivaEstado == 'Disponible') or (chivaEstado =='No Disponible'):
             pass
         else:
-            messages.error(request, 'Estado de chiva no válido.')
+            messages.error(request, 'Estado de chiva no válido. Selecciona una opción válida por favor')
             return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
                 'listaChivas': listaChivas, 
                 'chivaPlaca' : chivaPlaca, 
                 'chivaCapacidad' : chivaCapacidad, 
@@ -578,6 +648,7 @@ def chivas(request):
 
     template = loader.get_template('chivas.html')
     context = {
+        'pag_obj': pag_obj,
         'listaChivas': listaChivas,
         'form': form,
         'actualización': None
@@ -590,6 +661,10 @@ def actualizarFormChiva(request, id):
     chiva = get_object_or_404(Chiva, pk=id)
     listaChivas = Chiva.objects.all()
     paseoChiva = None
+    pag = Paginator(listaChivas, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     # Chivas asociadas a un paseo 
 
@@ -614,6 +689,7 @@ def actualizarFormChiva(request, id):
         if  Chiva.objects.filter(placa = chiva.placa ).exclude(pk=id).exists():
                 messages.error(request, 'La placa de la chiva ya se encuentra registrada.')
                 return render(request, 'chivas.html', {
+                    'pag_obj': pag_obj,
                     'listaChivas': listaChivas, 
                     'actualizacion': chiva,
                     'paseoChiva': paseoChiva})
@@ -626,6 +702,7 @@ def actualizarFormChiva(request, id):
         form = ChivaForm(instance=chiva) 
 
     context = {
+        'pag_obj': pag_obj,
         'listaChivas': listaChivas,
         'form': form,
         'actualizacion': chiva,
@@ -653,7 +730,10 @@ def eliminarChiva(request, id):
 
 def paquetes(request):
     listaPaquetes = Paquete.objects.all()
-    
+    pag = Paginator(listaPaquetes, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     if request.method == 'POST':
         form = PaqueteForm(request.POST)
@@ -676,6 +756,7 @@ def paquetes(request):
 
     template = loader.get_template('paquetes.html')
     context = {
+        'pag_obj': pag_obj,
         'listaPaquetes': listaPaquetes,
         'form': form,
         'actualización': None
@@ -687,7 +768,11 @@ def paquetes(request):
 def actualizarFormPaquete(request, id):
     paquete = get_object_or_404(Paquete, pk=id)
     listaPaquetes = Paquete.objects.all()
-    
+ 
+    pag = Paginator(listaPaquetes, 7) 
+
+    pag_numb = request.GET.get('page')
+    pag_obj = pag.get_page(pag_numb)
 
     if request.method == 'POST':
         paqueteNombre = request.POST.get("nombre")
@@ -707,6 +792,7 @@ def actualizarFormPaquete(request, id):
 
    
     context = {
+        'pag_obj': pag_obj,
         'listaPaquetes': listaPaquetes,
         'form': form,
         'actualizacion': paquete,

@@ -21,4 +21,5 @@ urlpatterns = [
     path('crearReserva/', views.crearReserva, name='crearReserva'),  
     path('reservarPaseo/<int:paseo_id>/', views.reservarPaseo, name='reservarPaseo'),
     path('cancelarReserva/<int:reserva_id>/', views.cancelarReserva, name='cancelarReserva'),
+    path('paseoAdmin/eliminarPaseo/<int:id>', views.eliminarPaseo, name='eliminarPaseo'),
 ]

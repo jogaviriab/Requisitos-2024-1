@@ -58,7 +58,8 @@ class Reserva(models.Model):
     fechaCreacion = models.DateField()
     valor = models.IntegerField()
     paquete = models.ForeignKey(Paquete, on_delete=models.CASCADE, default='none')
-    comprobantePago = models.FileField(upload_to='comprobantes/', default='none')
+    #comprobantePago = models.FileField(upload_to='comprobantes/', default='none')
+    comprobantePago = models.CharField(max_length=200000, default='none')
     persona = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     
     def can_be_cancelled(self):

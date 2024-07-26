@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Reserva</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">
+</head>
+<body>
+    {% include 'navbarCliente.html' %}
+
+    <div class="container mt-5">
+        <h1>Consultar Reserva</h1>
+        
+        <form method="POST" class="form-inline">
+            {% csrf_token %}
+            <div class="form-group mx-sm-3 mb-2">
+                <label for="reserva_id" class="sr-only">ID de la Reserva</label>
+                {{ form.reserva_id }}
+            </div>
+            <button type="submit" class="btn btn-primary mb-2">Buscar</button>
+        </form>
+
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        {% if reserva %}
+            <h2>Reserva Encontrada</h2>
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <img src="{{ reserva.paseo.imagen }}" alt="..." class="img-thumbnail">
+                    <p><strong>Origen:</strong> {{ reserva.paseo.origen }}</p>
+                    <p><strong>Destino:</strong> {{ reserva.paseo.destino }}</p>
+                    <p><strong>Valor:</strong> {{ reserva.valor}}</p>                    
+                    <p><strong>Cliente:</strong> {{ reserva.persona.nombre}}</p>                    
+                    <p><strong>Paquete:</strong> {{ reserva.paquete.nombre }}: {{ reserva.paquete.descripcion }}</p>
+                    <p><strong>Fecha:</strong> {{ reserva.paseo.fecha }}</p>
+                    <p><strong>Hora:</strong> {{ reserva.paseo.hora }}</p>
+                    <p><strong>Chiva:</strong> {{ reserva.paseo.chiva.tipo }}</p>
+                    <p><strong>Estado de chiva/paseo:</strong> {{ reserva.paseo.chiva.estado }}</p>
+                    <p><strong>Estado de reserva:</strong> {{ reserva.estado }}</p>
+                    <a href="{% url 'pagarReserva' reserva.id %}" class="btn btn-primary">Pagar</a>
+                    <a href="{% url 'cancelarReserva' reserva.id %}" class="btn btn-danger">Cancelar</a>
+                </li>
+            </ul>
+        {% endif %}
+    </div>
+    <div class="container mt-5">
+        <a href="{% url 'crearReserva'%}" class="btn btn-danger">Volver</a>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

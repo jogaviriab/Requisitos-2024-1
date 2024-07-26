@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagar Reserva</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">
+</head>
+
+<body>
+    {% include 'navbarCliente.html' %}
+
+    <div class="container mt-5">
+        <h1>Pagar Reserva</h1>
+
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
+        {% if messages %}
+            <div class="alert alert-info" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Formulario de pago -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+
+                <p><br><p>
+                <h3>Valor: {{ reserva.valor }}</h3>
+                <p><br><p>
+                <label for="id_comprobantePago">Comprobante de Pago:</label>
+                {{ form.comprobantePago }}
+                <small class="text-muted">Sube una imagen del comprobante en formato JPG.</small>
+
+                {% if form.comprobantePago.errors %}
+                    <div class="text-danger">
+                        {{ form.comprobantePago.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            <input class="btn btn-primary" type="submit" value="Pagar">
+        </form>
+
+        <a class="btn btn-danger" href="{% url 'consultarReserva' %}"><h5>Volver</h5></a>
+
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Asegúrate de tener la referencia a Bootstrap JS en tu proyecto -->
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Reserva</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/styles.css' %}">
+    <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">
+</head>
+<body>
+    {% include 'navbarCliente.html' %}
+
+    <div class="container mt-5">
+        <h1>Crea tu reserva</h1>
+        
+        <h2>¿Ya tienes reservas creadas? <a href="{% url 'consultarReserva' %}">Gestiona aquí tu reserva</a></h2>
+
+        <h1>Selecciona el paseo</h1>
+        
+        <div class="btn-group mb-3" role="group">
+            <a href="{% url 'crearReserva' %}?tipo_chiva=rumbera" class="btn btn-primary">Chiva Rumbera</a>
+            <a href="{% url 'crearReserva' %}?tipo_chiva=normal" class="btn btn-primary">Chiva Normal</a>
+        </div>
+
+        {% if no_paseos_rumbera %}
+            <div class="alert alert-danger" role="alert">
+                No hay paseos disponibles para Chiva Rumbera en este momento.
+            </div>
+        {% endif %}
+
+        {% if no_paseos_normal %}
+            <div class="alert alert-danger" role="alert">
+                No hay paseos disponibles para Chiva Normal en este momento.
+            </div>
+        {% endif %}
+
+        {% if paseos_rumbera %}
+        <div>
+            <h2>Chiva Rumbera</h2>
+            <div class="row">
+                {% for paseo in paseos_rumbera %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <img src="{{ paseo.imagen }}" alt="imagen paseo" class="img-thumbnail">
+                                <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
+                                <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
+                                <p class="card-text">Descripción: {{ paseo.descripcion }}</p>
+                                <p class="card-text">Fecha: {{ paseo.fecha }}</p>
+                                <p class="card-text">Hora: {{ paseo.hora }}</p>
+                                <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
+                                <a href="{% url 'reservarPaseo' paseo.id %}" class="btn btn-primary">Reservar</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if paseos_normal %}
+        <div>
+            <h2>Chiva Normal</h2>
+            <div class="row">
+                {% for paseo in paseos_normal %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <img src="{{ paseo.imagen }}" alt="imagen paseo" class="img-thumbnail">
+                                <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
+                                <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
+                                <p class="card-text">Descripción: {{ paseo.descripcion }}</p>
+                                <p class="card-text">Fecha: {{ paseo.fecha }}</p>
+                                <p class="card-text">Hora: {{ paseo.hora }}</p>
+                                <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
+                                <a href="{% url 'reservarPaseo' paseo.id %}" class="btn btn-primary">Reservar</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+            <div class="alert alert-info" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

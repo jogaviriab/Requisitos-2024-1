@@ -234,27 +234,39 @@ def crearReserva(request):
 
 
 def consultarReserva(request):
-    error_message = None
+
     reserva = None
+    idReserva = None
+    btnCan = None
+    ambos = None
 
     if request.method == 'POST':
-        form = ConsultaReservaForm(request.POST)
-        if form.is_valid():
-            reserva_id = form.cleaned_data['reserva_id']
-            try:
-                reserva = Reserva.objects.get(id=reserva_id)
-            except Reserva.DoesNotExist:
-                error_message = "No se encontró ninguna reserva con el ID proporcionado."
-        else:
-            error_message = "Por favor, ingrese un ID de reserva válido."
-    else:
-        form = ConsultaReservaForm()
 
-    return render(request, 'consultarReserva.html', {
-        'form': form,
-        'error_message': error_message,
+        idReserva = request.POST.get('idReserva')
+        
+        try:
+            reserva = Reserva.objects.get(id=idReserva)
+            fecha = reserva.paseo.fecha
+            estado = reserva.estado
+        except Reserva.DoesNotExist:
+            messages.error(request, "No se encontró ninguna reserva con el ID proporcionado.")
+            return redirect('consultarReserva')
+
+        if fecha > datetime.now().date(): #Paseo vigente
+            if estado == 'confirmada':
+                btnCan = True
+            elif estado == 'pendientePago' or (estado == 'rechazada' and (fecha - datetime.now().date()).days >= 1):
+                ambos = True
+
+
+    template = loader.get_template('consultarReserva.html')
+    context = {
         'reserva': reserva,
-    })
+        'idReserva': idReserva,
+        'btnCan' : btnCan,
+        'ambos' : ambos,
+    }
+    return HttpResponse(template.render(context, request))
 
 def misReservas(request):
     if request.method == 'POST':
@@ -389,6 +401,13 @@ def registrarPaseo(request):
                 return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
                 'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
                 'equilibrio': equilibrio, 'descuento': descuento})
+
+            if int(descuento) > int(valor):
+                messages.error(request, 'El valor del descuento no puede superar el valor del paseo.')
+                return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'equilibrio': equilibrio, 'descuento': descuento})
+
 
             # Crear una cadena de texto con la fecha en el formato correcto
             fechaVolumen = "2022-12-31"

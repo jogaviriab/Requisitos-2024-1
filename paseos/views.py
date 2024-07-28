@@ -870,7 +870,7 @@ def pagosAdmin(request):
             reservaElegida.save()
         except Reserva.DoesNotExist:
             messages.error(request, 'No se ha encontrado la reserva.')
-        return redirect('pagosAdmin')
+        
     
     return render(request, 'pagosAdmin.html', {'listaReservas' : objsReserva,
                                                'lista' : lista})

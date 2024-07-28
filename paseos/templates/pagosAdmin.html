@@ -24,7 +24,8 @@
                 </button>
                 <ul class="dropdown-menu">
                 <li><a class="dropdown-item {% if lista == 'confirmadas' %}active{% endif %}" href="?lista=confirmadas">Confirmadas</a></li>
-                <li><a class="dropdown-item {% if lista == 'pendientes' %}active{% endif %}" href="?lista=pendientes">Pendientes</a></li>
+                <li><a class="dropdown-item {% if lista == 'pendienteConfirmacion' %}active{% endif %}" href="?lista=pendienteConfirmacion">Pendientes confirmacion</a></li>
+                <li><a class="dropdown-item {% if lista == 'rechazadas' %}active{% endif %}" href="?lista=rechazadas">Rechazadas</a></li>
             </div>
             {% if messages %}
             <div class="col-5 text-center">
@@ -74,10 +75,10 @@
                         <form method="post" action=''>
                             {% csrf_token %}
                             <input type="hidden" name="reservaID" value="{{ reserva.id }}">
-                            {% if reserva.estado == 'pendientePago' %}
-                                <button type="submit" name="action" value="confirmar" class="btn btn-primary me-2">Confirmar</button>
+                            {% if reserva.estado == 'pendienteConfirmacion' %}
+                                <button type="submit" name="action" value="confirmar" class="btn btn-primary me-2">Confirmar</button>  
+                                <button type="submit" name="action" value="rechazar" class="btn btn-danger">Rechazar</button>
                             {% endif %}
-                            <button type="submit" name="action" value="rechazar" class="btn btn-danger">Rechazar</button>
                         </form>
                     </td>
                   </tr>

@@ -24,7 +24,66 @@
         {% endif %}
 
         <h2>Paseo seleccionado</h2>
-        <div class="card">
+        <div class="card" style="max-width: 402px; max-height: 515px; transform: none;">
+            <div id="{{ paseo.id }}" class="card-img-top">
+                <div id="carousel{{ paseo.id }}" class="carousel slide" style="display: none;">
+                    <div class="carousel-inner" id="inner{{ paseo.id }}">
+                      
+                    </div>
+                    <button id="button1{{ paseo.id }}" class="carousel-control-prev" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button id="button2{{ paseo.id }}" class="carousel-control-next" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', (event) => {
+                        var imgString = "{{ paseo.imagen }}";
+                        var imgParts = imgString.split('-');
+                        if(imgParts.length > 2){
+                            imgParts.forEach((part, index) => {
+                                if(part == '') return;
+                                document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                var divElement = document.createElement('div');
+                                if(index == 0){
+                                    divElement.className = 'carousel-item active';
+                                }else{
+                                    divElement.className = 'carousel-item';
+                                }
+                                var imgElement = document.createElement('img');
+                                imgElement.src = 'data:image/jpeg;base64,' + part;
+                                imgElement.style.width = '400px';
+                                imgElement.style.height = '300px';
+                                divElement.appendChild(imgElement);
+                                document.getElementById('inner{{ paseo.id }}').appendChild(divElement);
+                            });
+                        } else {
+                            imgParts.forEach((part, index) => {
+                                if(part == '') return;
+                                document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                var divElement = document.createElement('div');
+                                if(index == 0){
+                                    divElement.className = 'carousel-item active';
+                                }else{
+                                    divElement.className = 'carousel-item';
+                                }
+                                var imgElement = document.createElement('img');
+                                imgElement.src = 'data:image/jpeg;base64,' + part;
+                                imgElement.style.width = '400px';
+                                imgElement.style.height = '300px';
+                                divElement.appendChild(imgElement);
+                                document.getElementById('inner{{ paseo.id }}').appendChild(divElement);
+                                document.getElementById('button1{{ paseo.id }}').style.display = 'none';
+                                document.getElementById('button2{{ paseo.id }}').style.display = 'none';
+                            });
+                        }
+                    });
+                </script>
+            </div>
             <div class="card-body">
                 <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
                 <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
@@ -32,6 +91,11 @@
                 <p class="card-text">Fecha: {{ paseo.fecha }}</p>
                 <p class="card-text">Hora: {{ paseo.hora }}</p>
                 <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
+                <hr><hr>
+                <!--
+                <a href="{% url 'reservarPaseo' paseo.id %}" class="btn btn-primary">Reservar</a>
+                <hr><hr><hr><hr>
+                -->
             </div>
         </div>
 
@@ -71,11 +135,11 @@
             </div>
         {% endif %}
 
-        <h2>Buscar o Ingresar Datos del Cliente</h2>
+        <h2>Busca y/o ingresa tus datos</h2>
         <form method="POST" id="buscarClienteForm">
             {% csrf_token %}
             <div class="form-group">
-                <label for="cliente_id">ID del Cliente</label>
+                <label for="cliente_id">Ingresa tu ID</label>
                 <input type="text" name="cliente_id" id="cliente_id" class="form-control" value="{{ request.POST.cliente_id }}">
             </div>
             <button type="submit" name="buscar_cliente" class="btn btn-primary">Buscar Cliente</button>

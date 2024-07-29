@@ -8,11 +8,19 @@
     <link rel="stylesheet" href="{% static '/styles.css' %}">
     <link href="{% static '/stylesApp.css' %}" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="{% static '/images/chiva.png' %}">
+    <style>
+        .container {
+            margin-bottom: 50px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     {% include 'navbarCliente.html' %}
 
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <h1>Crea tu reserva</h1>
         
         <h2>¿Ya tienes reservas creadas? <a href="{% url 'consultarReserva' %}">Gestiona aquí tu reserva</a></h2>
@@ -42,18 +50,82 @@
             <div class="row">
                 {% for paseo in paseos_rumbera %}
                     <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <img src="{{ paseo.imagen }}" alt="imagen paseo" class="img-thumbnail">
-                                <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
-                                <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
-                                <p class="card-text">Descripción: {{ paseo.descripcion }}</p>
-                                <p class="card-text">Fecha: {{ paseo.fecha }}</p>
-                                <p class="card-text">Hora: {{ paseo.hora }}</p>
-                                <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
-                                <a href="{% url 'reservarPaseo' paseo.id %}" class="btn btn-primary">Reservar</a>
+                        <a href="{% url 'reservarPaseo' paseo.id %}" style="text-decoration: none;">
+                            <div class="card" style="max-width: 402px; max-height: 515px;">
+                                <div id="{{ paseo.id }}" class="card-img-top">
+                                    <div id="carousel{{ paseo.id }}" class="carousel slide" style="display: none;">
+                                        <div class="carousel-inner" id="inner{{ paseo.id }}">
+                                          
+                                        </div>
+                                        <button id="button1{{ paseo.id }}" class="carousel-control-prev" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="prev">
+                                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                          <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button id="button2{{ paseo.id }}" class="carousel-control-next" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="next">
+                                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                          <span class="visually-hidden">Next</span>
+                                        </button>
+                                    </div>
+
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', (event) => {
+                                            var imgString = "{{ paseo.imagen }}";
+                                            var imgParts = imgString.split('-');
+                                            if(imgParts.length > 2){
+                                                imgParts.forEach((part, index) => {
+                                                    if(part == '') return;
+                                                    document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                                    var divElement = document.createElement('div');
+                                                    if(index == 0){
+                                                        divElement.className = 'carousel-item active';
+                                                    }else{
+                                                        divElement.className = 'carousel-item';
+                                                    }
+                                                    var imgElement = document.createElement('img');
+                                                    imgElement.src = 'data:image/jpeg;base64,' + part;
+                                                    imgElement.style.width = '400px';
+                                                    imgElement.style.height = '300px';
+                                                    divElement.appendChild(imgElement);
+                                                    document.getElementById('inner{{ paseo.id }}').appendChild(divElement);
+                                                });
+                                            } else {
+                                                imgParts.forEach((part, index) => {
+                                                    if(part == '') return;
+                                                    document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                                    var divElement = document.createElement('div');
+                                                    if(index == 0){
+                                                        divElement.className = 'carousel-item active';
+                                                    }else{
+                                                        divElement.className = 'carousel-item';
+                                                    }
+                                                    var imgElement = document.createElement('img');
+                                                    imgElement.src = 'data:image/jpeg;base64,' + part;
+                                                    imgElement.style.width = '400px';
+                                                    imgElement.style.height = '300px';
+                                                    divElement.appendChild(imgElement);
+                                                    document.getElementById('inner{{ paseo.id }}').appendChild(divElement);
+                                                    document.getElementById('button1{{ paseo.id }}').style.display = 'none';
+                                                    document.getElementById('button2{{ paseo.id }}').style.display = 'none';
+                                                });
+                                            }
+                                        });
+                                    </script>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
+                                    <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
+                                    <p class="card-text">Descripción: {{ paseo.descripcion }}</p>
+                                    <p class="card-text">Fecha: {{ paseo.fecha }}</p>
+                                    <p class="card-text">Hora: {{ paseo.hora }}</p>
+                                    <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
+                                    <hr><hr>
+                                    <!--
+                                    <a href="{% url 'reservarPaseo' paseo.id %}" class="btn btn-primary">Reservar</a>
+                                    <hr><hr><hr><hr>
+                                    -->
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 {% endfor %}
             </div>
@@ -66,18 +138,82 @@
             <div class="row">
                 {% for paseo in paseos_normal %}
                     <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <img src="{{ paseo.imagen }}" alt="imagen paseo" class="img-thumbnail">
-                                <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
-                                <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
-                                <p class="card-text">Descripción: {{ paseo.descripcion }}</p>
-                                <p class="card-text">Fecha: {{ paseo.fecha }}</p>
-                                <p class="card-text">Hora: {{ paseo.hora }}</p>
-                                <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
-                                <a href="{% url 'reservarPaseo' paseo.id %}" class="btn btn-primary">Reservar</a>
+                        <a href="{% url 'reservarPaseo' paseo.id %}" style="text-decoration: none;">
+                            <div class="card" style="max-width: 402px; max-height: 515px;">
+                                <div id="{{ paseo.id }}" class="card-img-top">
+                                    <div id="carousel{{ paseo.id }}" class="carousel slide" style="display: none;">
+                                        <div class="carousel-inner" id="inner{{ paseo.id }}">
+                                          
+                                        </div>
+                                        <button id="button1{{ paseo.id }}" class="carousel-control-prev" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="prev">
+                                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                          <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button id="button2{{ paseo.id }}" class="carousel-control-next" type="button" data-bs-target="#carousel{{ paseo.id }}" data-bs-slide="next">
+                                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                          <span class="visually-hidden">Next</span>
+                                        </button>
+                                    </div>
+
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', (event) => {
+                                            var imgString = "{{ paseo.imagen }}";
+                                            var imgParts = imgString.split('-');
+                                            if(imgParts.length > 2){
+                                                imgParts.forEach((part, index) => {
+                                                    if(part == '') return;
+                                                    document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                                    var divElement = document.createElement('div');
+                                                    if(index == 0){
+                                                        divElement.className = 'carousel-item active';
+                                                    }else{
+                                                        divElement.className = 'carousel-item';
+                                                    }
+                                                    var imgElement = document.createElement('img');
+                                                    imgElement.src = 'data:image/jpeg;base64,' + part;
+                                                    imgElement.style.width = '400px';
+                                                    imgElement.style.height = '300px';
+                                                    divElement.appendChild(imgElement);
+                                                    document.getElementById('inner{{ paseo.id }}').appendChild(divElement);
+                                                });
+                                            } else {
+                                                imgParts.forEach((part, index) => {
+                                                    if(part == '') return;
+                                                    document.getElementById('carousel{{ paseo.id }}').style.display = 'flex';
+                                                    var divElement = document.createElement('div');
+                                                    if(index == 0){
+                                                        divElement.className = 'carousel-item active';
+                                                    }else{
+                                                        divElement.className = 'carousel-item';
+                                                    }
+                                                    var imgElement = document.createElement('img');
+                                                    imgElement.src = 'data:image/jpeg;base64,' + part;
+                                                    imgElement.style.width = '400px';
+                                                    imgElement.style.height = '300px';
+                                                    divElement.appendChild(imgElement);
+                                                    document.getElementById('inner{{ paseo.id }}').appendChild(divElement);
+                                                    document.getElementById('button1{{ paseo.id }}').style.display = 'none';
+                                                    document.getElementById('button2{{ paseo.id }}').style.display = 'none';
+                                                });
+                                            }
+                                        });
+                                    </script>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ paseo.origen }} - {{ paseo.destino }}</h5>
+                                    <p class="card-text">Disponibilidad: {{ paseo.disponibilidad }}</p>
+                                    <p class="card-text">Descripción: {{ paseo.descripcion }}</p>
+                                    <p class="card-text">Fecha: {{ paseo.fecha }}</p>
+                                    <p class="card-text">Hora: {{ paseo.hora }}</p>
+                                    <p class="card-text">Valor: {{ paseo.esquemaCobro.valor }}</p>
+                                    <hr><hr>
+                                    <!--
+                                    <a href="{% url 'reservarPaseo' paseo.id %}" class="btn btn-primary">Reservar</a>
+                                    <hr><hr><hr><hr>
+                                    -->
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 {% endfor %}
             </div>

@@ -8,9 +8,14 @@ from django.utils import timezone
 
 # Create your models here.
 class CuentaBancaria(models.Model):
+    TIPO_CUENTA_CHOICES = [
+        ('Ahorros', 'Ahorros'),
+        ('Corriente', 'Corriente'),
+    ]
     numCuenta = models.IntegerField()
     tipoCuente = models.CharField(max_length=100)
     entidadBancaria = models.CharField(max_length=100)
+
 
 class Cliente(models.Model):
     nombre = models.CharField(max_length=100)

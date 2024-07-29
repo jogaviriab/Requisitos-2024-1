@@ -839,13 +839,15 @@ def eliminarPaquete(request, id):
 
 
 def pagosAdmin(request):
-    pendientes = Reserva.objects.filter(estado="pendientePago")
+    pendienteConfirmacion = Reserva.objects.filter(estado="pendienteConfirmacion")
     confirmadas = Reserva.objects.filter(estado="confirmada")
-
+    rechazadas = Reserva.objects.filter(estado="rechazada")
     lista = request.GET.get('lista', 'confirmadas')
 
-    if lista == 'pendientes':
-        listaReservas = pendientes
+    if lista == 'pendienteConfirmacion':
+        listaReservas = pendienteConfirmacion
+    elif lista == 'rechazadas':
+        listaReservas = rechazadas
     else:
         listaReservas = confirmadas
 
@@ -865,7 +867,31 @@ def pagosAdmin(request):
                 reservaElegida.estado = 'confirmada'
                 messages.success(request, f"Reserva No. {reservaElegida.id} confirmada")
             elif action == 'rechazar':
-                reservaElegida.estado = 'pendientePago'
+                reservaElegida.estado = 'rechazada'
+
+                text_content = f'Estimado/a {reservaElegida.persona.nombre},\n\n'
+                text_content += f'La reserva con numero {reservaElegida.id} que esta a su nombre ha sido rechazada.\n'
+                
+                html_content = '<p>Estimado/a <strong>{}</strong>,</p>'.format(reservaElegida.persona.nombre)
+                html_content += '<p>Su reserva de paseo para el {} ha sido rechazada por irregularidades en el comprobante.</p>'.format(reservaElegida.paseo.fecha)
+                html_content += '<p>A partir de este momento, dispondra de 24 horas para reenviar el comprobante, caso tal de que no lo haga, su reserva será cancelada.<p>'
+                html_content += '<p>Detalles de la reserva:</p>'
+                html_content += '<ul>'
+                html_content += '<li>ID reserva: {}</li>'.format(reservaElegida.id)
+                html_content += '<li>Paseo: {} - {}</li>'.format(reservaElegida.paseo.origen, reservaElegida.paseo.destino)            
+                html_content += '<li>Valor: {}</li>'.format(reservaElegida.valor)
+                html_content += '<li>Cuenta registrada: {} {}</li>'.format(reservaElegida.persona.cuentaBancaria.entidadBancaria, reservaElegida.persona.cuentaBancaria.tipoCuente)
+                html_content += '<li>Número de cuenta: {}</li>'.format(reservaElegida.persona.cuentaBancaria.numCuenta)
+                html_content += '<li>Paquete: {}</li>'.format(reservaElegida.paquete.nombre)
+                html_content += '<li>Fecha: {}</li>'.format(reservaElegida.paseo.fecha)
+                html_content += '<li>Hora: {}</li>'.format(reservaElegida.paseo.hora)
+                html_content += '<li>Chiva: {}</li>'.format(reservaElegida.paseo.chiva.tipo)
+                html_content += '<li>Estado de reserva: {}</li>'.format(reservaElegida.estado)
+                html_content += '</ul>'    
+                html_content += '<p>Atentamente, Chivas Travel.</p>'
+                msg = EmailMultiAlternatives('Reserva rechazada', text_content, settings.EMAIL_HOST_USER, ['capry2512@gmail.com'])
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
                 messages.error(request, f"Reserva No. {reservaElegida.id} rechazada")
             reservaElegida.save()
         except Reserva.DoesNotExist:

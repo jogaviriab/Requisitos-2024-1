@@ -54,28 +54,28 @@ def cancelarReserva(request, reserva_id):
                 reserva.paseo.save()
             else:
                 reserva.delete()
-            # subject = 'Reserva cancelada correctamente'
-            # text_content = f'Estimado/a {reserva.persona.nombre},\n\n'
-            # text_content += f'Su reserva del paseo para el {reserva.paseo.fecha} ha sido cancelada correctamente.\n'
+            subject = 'Reserva cancelada correctamente'
+            text_content = f'Estimado/a {reserva.persona.nombre},\n\n'
+            text_content += f'Su reserva del paseo para el {reserva.paseo.fecha} ha sido cancelada correctamente.\n'
 
-            # html_content = '<p>Estimado/a <strong>{}</strong>,</p>'.format(reserva.persona.nombre)
-            # html_content += '<p>Su reserva del paseo para el {} ha sido cancelada correctamente.</p>'.format(reserva.paseo.fecha)
-            # html_content += '<p>Detalles de la reserva:</p>'
-            # html_content += '<ul>'
-            # html_content += '<li>ID: {}</li>'.format(reserva.id)
-            # html_content += '<li>Paseo: {} - {}</li>'.format(reserva.paseo.origen, reserva.paseo.destino)            
-            # html_content += '<li>Valor de devolución: {}</li>'.format(0.7 * reserva.valor)
-            # html_content += '<li>Paquete: {}</li>'.format(reserva.paquete.nombre)
-            # html_content += '<li>Estado: {}</li>'.format(reserva.estado)
-            # html_content += '</ul>'
-            # html_content += '<p>Esté al tanto de su devolución.</p>\n\n'                  
-            # html_content += '<p>Por favor recuerde leer los términos y condiciones.</p>\n\n'
-            # html_content += '<p>Atentamente, Chivas Travel.</p>'
+            html_content = '<p>Estimado/a <strong>{}</strong>,</p>'.format(reserva.persona.nombre)
+            html_content += '<p>Su reserva del paseo para el {} ha sido cancelada correctamente.</p>'.format(reserva.paseo.fecha)
+            html_content += '<p>Detalles de la reserva:</p>'
+            html_content += '<ul>'
+            html_content += '<li>ID: {}</li>'.format(reserva.id)
+            html_content += '<li>Paseo: {} - {}</li>'.format(reserva.paseo.origen, reserva.paseo.destino)            
+            html_content += '<li>Valor de devolución: {}</li>'.format(0.7 * reserva.valor)
+            html_content += '<li>Paquete: {}</li>'.format(reserva.paquete.nombre)
+            html_content += '<li>Estado: {}</li>'.format(reserva.estado)
+            html_content += '</ul>'
+            html_content += '<p>Esté al tanto de su devolución.</p>\n\n'                  
+            html_content += '<p>Por favor recuerde leer los términos y condiciones.</p>\n\n'
+            html_content += '<p>Atentamente, Chivas Travel.</p>'
             
-            # # reserva.delete()
-            # msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [reserva.persona.correo])
-            # msg.attach_alternative(html_content, "text/html")
-            # msg.send()
+            # reserva.delete()
+            msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [reserva.persona.correo])
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
 
             messages.success(request, "Reserva cancelada exitosamente. \nSe envió un correo con la información de la cancelación.")
             return redirect('consultarReserva')
@@ -294,7 +294,7 @@ def pagarReserva(request, reservaId):
 
     # Verificación del estado de la reserva
     if reserva.estado == 'pendienteConfirmacion':
-        messages.error(request, 'El comprobante de pago ya ha sido enviado y está pendiente de comprobación.')
+        messages.error(request, 'El comprobante de pago ya ha sido enviado y está pendiente de confirmación.')
 
     if request.method == 'POST':
         reserva.estado = 'pendienteConfirmacion'
@@ -309,7 +309,7 @@ def pagarReserva(request, reservaId):
             imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
             reserva.comprobantePago = imagen_base64
             reserva.save()
-            messages.success(request, 'El comprobante de pago ha sido enviado correctamente. Está pendiente de comprobación.')
+            messages.success(request, 'El comprobante de pago ha sido enviado correctamente. Está pendiente de confirmación.')
 
     return render(request, 'pagarReserva.html', {'reserva': reserva})
 

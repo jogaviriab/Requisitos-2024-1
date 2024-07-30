@@ -293,22 +293,25 @@ def pagarReserva(request, reservaId):
     reserva = get_object_or_404(Reserva, id=reservaId)
 
     # Verificación del estado de la reserva
-    if reserva.estado == 'pendienteComprobacion':
+    if reserva.estado == 'pendienteConfirmacion':
         messages.error(request, 'El comprobante de pago ya ha sido enviado y está pendiente de comprobación.')
 
     if request.method == 'POST':
-        form = PagarReservaForm(request.POST, request.FILES, instance=reserva)
-        if form.is_valid():
-            reserva = form.save(commit=False)
-            reserva.estado = 'pendienteComprobacion'
+        reserva.estado = 'pendienteConfirmacion'
+        imagen = request.FILES.get('imagenComprobante')
+        if not imagen:
+            messages.error(request, 'Por favor, adjunte un comprobante de pago válido.')
+            return render(request, 'pagarReserva.html', {'reserva': reserva})
+        else:
+            imagen_base64 = ''
+            imagenContenido = imagen.read()
+            # Convertir el contenido de la imagen a una cadena Base64
+            imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
+            reserva.comprobantePago = imagen_base64
             reserva.save()
             messages.success(request, 'El comprobante de pago ha sido enviado correctamente. Está pendiente de comprobación.')
-        else:
-            messages.error(request, 'Por favor, adjunte un comprobante de pago válido.')
-    else:
-        form = PagarReservaForm(instance=reserva)
 
-    return render(request, 'pagarReserva.html', {'form': form, 'reserva': reserva})
+    return render(request, 'pagarReserva.html', {'reserva': reserva})
 
 
 #ADMIN

@@ -5,8 +5,11 @@ from .models import Paquete
 from .models import Reserva
 from django.core.exceptions import ValidationError
 
-class ConsultaReservaForm(forms.Form):
-    reserva_id = forms.IntegerField(label='ID de la Reserva')
+class ConsultaReservaForm(forms.ModelForm):
+    # reserva_id = forms.IntegerField(label='ID de la Reserva')
+    class Meta:
+        model = Reserva
+        fields = [ 'id']
 
 class ChivaForm(forms.ModelForm):
     class Meta:

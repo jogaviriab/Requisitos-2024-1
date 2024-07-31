@@ -37,23 +37,27 @@ from chivasTravel import settings
 #CLIENTE
 def cancelarReserva(request, reserva_id):
     reserva = get_object_or_404(Reserva, id=reserva_id)
-    
+   
     if request.method == 'POST':
         if not reserva.can_be_cancelled():
             messages.error(request, "No es posible cancelar la reserva faltando menos de 72 horas para el paseo.")
         else:
             if reserva.comprobantePago != 'none':
+                reserva.estado="pendienteDesembolso"
+                reserva.save()
                 # Registrar el desembolso
                 Desembolso.objects.create(
                     reserva=reserva,
                     monto=reserva.valor * 0.7,
                     motivo='Cancelación de reserva',
-                    estado='Pendiente',
+                    estado='pendiente',
                     comprobante=reserva.comprobantePago
                 )
 
-            reserva.delete()
-
+                reserva.paseo.disponibilidad += 1  # Al cancelar la reserva, aumenta la disponibilidad
+                reserva.paseo.save()
+            else:
+                reserva.delete()
             subject = 'Reserva cancelada correctamente'
             text_content = f'Estimado/a {reserva.persona.nombre},\n\n'
             text_content += f'Su reserva del paseo para el {reserva.paseo.fecha} ha sido cancelada correctamente.\n'
@@ -71,33 +75,34 @@ def cancelarReserva(request, reserva_id):
             html_content += '<p>Esté al tanto de su devolución.</p>\n\n'                  
             html_content += '<p>Por favor recuerde leer los términos y condiciones.</p>\n\n'
             html_content += '<p>Atentamente, Chivas Travel.</p>'
-
+            
+            # reserva.delete()
             msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [reserva.persona.correo])
             msg.attach_alternative(html_content, "text/html")
             msg.send()
 
             messages.success(request, "Reserva cancelada exitosamente. \nSe envió un correo con la información de la cancelación.")
+            return redirect('consultarReserva')
             
     return render(request, 'cancelarReserva.html', {'reserva': reserva})
 
-
 ####?????????
-def confirmarCancelacion(request, reserva_id):
-    reserva = get_object_or_404(Reserva, id=reserva_id)
-    now = timezone.now()
-    if reserva.paseo.fecha - now < timedelta(hours=72):
-        return render(request, 'errorCancelacion.html', {
-            'error_message': "No es posible realizar la cancelación con menos de 72 horas de anticipación."
-        })
+# def confirmarCancelacion(request, reserva_id):
+#     reserva = get_object_or_404(Reserva, id=reserva_id)
+#     now = timezone.now()
+#     if reserva.paseo.fecha - now < timedelta(hours=72):
+#         return render(request, 'errorCancelacion.html', {
+#             'error_message': "No es posible realizar la cancelación con menos de 72 horas de anticipación."
+#         })
     
-    if request.method == 'POST':
-        # Aquí incluir lógica para manejar el desembolso si es necesario.
-        reserva.delete()
-        return redirect('consultarReserva')
+#     if request.method == 'POST':
+#         # Aquí incluir lógica para manejar el desembolso si es necesario.
+#         reserva.delete()
+#         return redirect('consultarReserva')
     
-    return render(request, 'confirmarCancelacion.html', {
-        'reserva': reserva
-    })
+#     return render(request, 'confirmarCancelacion.html', {
+#         'reserva': reserva
+#     })
 
 def reservarPaseo(request, paseo_id):
     paseo = get_object_or_404(Paseo, id=paseo_id)
@@ -277,27 +282,39 @@ def crearReserva(request):
     })
 
 def consultarReserva(request):
-    error_message = None
+
     reserva = None
+    idReserva = None
+    btnCan = None
+    ambos = None
 
     if request.method == 'POST':
-        form = ConsultaReservaForm(request.POST)
-        if form.is_valid():
-            reserva_id = form.cleaned_data['reserva_id']
-            try:
-                reserva = Reserva.objects.get(id=reserva_id)
-            except Reserva.DoesNotExist:
-                error_message = "No se encontró ninguna reserva con el ID proporcionado."
-        else:
-            error_message = "Por favor, ingrese un ID de reserva válido."
-    else:
-        form = ConsultaReservaForm()
 
-    return render(request, 'consultarReserva.html', {
-        'form': form,
-        'error_message': error_message,
+        idReserva = request.POST.get('idReserva')
+        
+        try:
+            reserva = Reserva.objects.get(id=idReserva)
+            fecha = reserva.paseo.fecha
+            estado = reserva.estado
+        except Reserva.DoesNotExist:
+            messages.error(request, "No se encontró ninguna reserva con el ID proporcionado.")
+            return redirect('consultarReserva')
+
+        if fecha > datetime.now().date(): #Paseo vigente
+            if estado == 'confirmada':
+                btnCan = True
+            elif estado == 'pendientePago' or (estado == 'rechazada' and (fecha - datetime.now().date()).days >= 1):
+                ambos = True
+
+
+    template = loader.get_template('consultarReserva.html')
+    context = {
         'reserva': reserva,
-    })
+        'idReserva': idReserva,
+        'btnCan' : btnCan,
+        'ambos' : ambos,
+    }
+    return HttpResponse(template.render(context, request))
 
 def misReservas(request):
     if request.method == 'POST':
@@ -319,22 +336,25 @@ def pagarReserva(request, reservaId):
     reserva = get_object_or_404(Reserva, id=reservaId)
 
     # Verificación del estado de la reserva
-    if reserva.estado == 'pendienteComprobacion':
-        messages.error(request, 'El comprobante de pago ya ha sido enviado y está pendiente de comprobación.')
+    if reserva.estado == 'pendienteConfirmacion':
+        messages.error(request, 'El comprobante de pago ya ha sido enviado y está pendiente de confirmación.')
 
     if request.method == 'POST':
-        form = PagarReservaForm(request.POST, request.FILES, instance=reserva)
-        if form.is_valid():
-            reserva = form.save(commit=False)
-            reserva.estado = 'pendienteComprobacion'
-            reserva.save()
-            messages.success(request, 'El comprobante de pago ha sido enviado correctamente. Está pendiente de comprobación.')
-        else:
+        reserva.estado = 'pendienteConfirmacion'
+        imagen = request.FILES.get('imagenComprobante')
+        if not imagen:
             messages.error(request, 'Por favor, adjunte un comprobante de pago válido.')
-    else:
-        form = PagarReservaForm(instance=reserva)
+            return render(request, 'pagarReserva.html', {'reserva': reserva})
+        else:
+            imagen_base64 = ''
+            imagenContenido = imagen.read()
+            # Convertir el contenido de la imagen a una cadena Base64
+            imagen_base64 += base64.b64encode(imagenContenido).decode('utf-8')
+            reserva.comprobantePago = imagen_base64
+            reserva.save()
+            messages.success(request, 'El comprobante de pago ha sido enviado correctamente. Está pendiente de confirmación.')
 
-    return render(request, 'pagarReserva.html', {'form': form, 'reserva': reserva})
+    return render(request, 'pagarReserva.html', {'reserva': reserva})
 
 
 #ADMIN
@@ -432,6 +452,13 @@ def registrarPaseo(request):
                 return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
                 'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
                 'equilibrio': equilibrio, 'descuento': descuento})
+
+            if int(descuento) > int(valor):
+                messages.error(request, 'El valor del descuento no puede superar el valor del paseo.')
+                return render(request, 'registrarPaseo.html', {'listaChivas': listaChivas, 'origen': origen, 'destino':destino, 'descripcion': descripcion, 'fecha': fecha,
+                'hora': hora, 'esquema': esquema, 'valor': valor, 'placaChiva': placaChiva, 'fechaAumento': fechaAumento, 'aumento': aumento,
+                'equilibrio': equilibrio, 'descuento': descuento})
+
 
             # Crear una cadena de texto con la fecha en el formato correcto
             fechaVolumen = "2022-12-31"
@@ -621,10 +648,9 @@ def paseoAdmin(request, id):
 
 # Registro de una chiva
 
-
 def chivas(request):
     listaChivas = Chiva.objects.all()
-    pag = Paginator(listaChivas, 7) 
+    pag = Paginator(listaChivas, 10) 
 
     pag_numb = request.GET.get('page')
     pag_obj = pag.get_page(pag_numb)
@@ -662,7 +688,28 @@ def chivas(request):
                 'chivaTipo' : chivaTipo, 
                 'chivaEstado' : chivaEstado })
         
-        # Verificación estado de chiva elegido en el formulario
+        # Verificación estado y capacidad de chiva elegido en el formulario
+        if int(chivaCapacidad) <= 0:
+            messages.error(request, 'Capacidad no válida, introduce un valor positivo por favor')
+            return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
+                'listaChivas': listaChivas, 
+                'chivaPlaca' : chivaPlaca, 
+                'chivaCapacidad' : chivaCapacidad, 
+                'chivaTipo' : chivaTipo,
+                'chivaEstado' : chivaEstado
+                 })    
+
+        elif int(chivaCapacidad) > 80:
+            messages.error(request, 'Capacidad no válida, la capacidad máxima permitida es de 80 personas')
+            return render(request, 'chivas.html', {
+                'pag_obj': pag_obj,
+                'listaChivas': listaChivas, 
+                'chivaPlaca' : chivaPlaca, 
+                'chivaCapacidad' : chivaCapacidad, 
+                'chivaTipo' : chivaTipo,
+                'chivaEstado' : chivaEstado
+                 })    
 
         if (chivaEstado == 'Disponible') or (chivaEstado =='No Disponible'):
             pass
@@ -682,6 +729,8 @@ def chivas(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Chiva registrada con éxito')
+            return redirect('chivas')
+         
         else:
             print(form.errors)  
             messages.error(request, 'Error al registrar la chiva.')
@@ -704,7 +753,7 @@ def actualizarFormChiva(request, id):
     chiva = get_object_or_404(Chiva, pk=id)
     listaChivas = Chiva.objects.all()
     paseoChiva = None
-    pag = Paginator(listaChivas, 7) 
+    pag = Paginator(listaChivas, 10) 
 
     pag_numb = request.GET.get('page')
     pag_obj = pag.get_page(pag_numb)
@@ -773,7 +822,7 @@ def eliminarChiva(request, id):
 
 def paquetes(request):
     listaPaquetes = Paquete.objects.all()
-    pag = Paginator(listaPaquetes, 7) 
+    pag = Paginator(listaPaquetes, 10) 
 
     pag_numb = request.GET.get('page')
     pag_obj = pag.get_page(pag_numb)
@@ -790,6 +839,7 @@ def paquetes(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Paquete registrado con éxito')
+            return redirect('paquetes')
         else:
             print(form.errors)  
             messages.error(request, 'Error al registrar el paquete.')
@@ -812,7 +862,7 @@ def actualizarFormPaquete(request, id):
     paquete = get_object_or_404(Paquete, pk=id)
     listaPaquetes = Paquete.objects.all()
  
-    pag = Paginator(listaPaquetes, 7) 
+    pag = Paginator(listaPaquetes, 10) 
 
     pag_numb = request.GET.get('page')
     pag_obj = pag.get_page(pag_numb)
@@ -861,15 +911,16 @@ def eliminarPaquete(request, id):
     return redirect('../')
 
 
-
 def pagosAdmin(request):
-    pendientes = Reserva.objects.filter(estado="pendientePago")
+    pendienteConfirmacion = Reserva.objects.filter(estado="pendienteConfirmacion")
     confirmadas = Reserva.objects.filter(estado="confirmada")
-
+    rechazadas = Reserva.objects.filter(estado="rechazada")
     lista = request.GET.get('lista', 'confirmadas')
 
-    if lista == 'pendientes':
-        listaReservas = pendientes
+    if lista == 'pendienteConfirmacion':
+        listaReservas = pendienteConfirmacion
+    elif lista == 'rechazadas':
+        listaReservas = rechazadas
     else:
         listaReservas = confirmadas
 
@@ -889,12 +940,36 @@ def pagosAdmin(request):
                 reservaElegida.estado = 'confirmada'
                 messages.success(request, f"Reserva No. {reservaElegida.id} confirmada")
             elif action == 'rechazar':
-                reservaElegida.estado = 'pendientePago'
+                reservaElegida.estado = 'rechazada'
+
+                text_content = f'Estimado/a {reservaElegida.persona.nombre},\n\n'
+                text_content += f'La reserva con numero {reservaElegida.id} que esta a su nombre ha sido rechazada.\n'
+                
+                html_content = '<p>Estimado/a <strong>{}</strong>,</p>'.format(reservaElegida.persona.nombre)
+                html_content += '<p>Su reserva de paseo para el {} ha sido rechazada por irregularidades en el comprobante.</p>'.format(reservaElegida.paseo.fecha)
+                html_content += '<p>A partir de este momento, dispondra de 24 horas para reenviar el comprobante, caso tal de que no lo haga, su reserva será cancelada.<p>'
+                html_content += '<p>Detalles de la reserva:</p>'
+                html_content += '<ul>'
+                html_content += '<li>ID reserva: {}</li>'.format(reservaElegida.id)
+                html_content += '<li>Paseo: {} - {}</li>'.format(reservaElegida.paseo.origen, reservaElegida.paseo.destino)            
+                html_content += '<li>Valor: {}</li>'.format(reservaElegida.valor)
+                html_content += '<li>Cuenta registrada: {} {}</li>'.format(reservaElegida.persona.cuentaBancaria.entidadBancaria, reservaElegida.persona.cuentaBancaria.tipoCuente)
+                html_content += '<li>Número de cuenta: {}</li>'.format(reservaElegida.persona.cuentaBancaria.numCuenta)
+                html_content += '<li>Paquete: {}</li>'.format(reservaElegida.paquete.nombre)
+                html_content += '<li>Fecha: {}</li>'.format(reservaElegida.paseo.fecha)
+                html_content += '<li>Hora: {}</li>'.format(reservaElegida.paseo.hora)
+                html_content += '<li>Chiva: {}</li>'.format(reservaElegida.paseo.chiva.tipo)
+                html_content += '<li>Estado de reserva: {}</li>'.format(reservaElegida.estado)
+                html_content += '</ul>'    
+                html_content += '<p>Atentamente, Chivas Travel.</p>'
+                msg = EmailMultiAlternatives('Reserva rechazada', text_content, settings.EMAIL_HOST_USER, ['capry2512@gmail.com'])
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
                 messages.error(request, f"Reserva No. {reservaElegida.id} rechazada")
             reservaElegida.save()
         except Reserva.DoesNotExist:
             messages.error(request, 'No se ha encontrado la reserva.')
-        return redirect('pagosAdmin')
+        
     
     return render(request, 'pagosAdmin.html', {'listaReservas' : objsReserva,
                                                'lista' : lista})

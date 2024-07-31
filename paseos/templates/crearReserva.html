@@ -23,7 +23,9 @@
     <div class="container mt-5 mb-5">
         <h1>Crea tu reserva</h1>
         
-        <h2>¿Ya tienes reservas creadas? <a href="{% url 'consultarReserva' %}">Gestiona aquí tu reserva</a></h2>
+        <h2>¿Ya tienes reservas creadas? 
+            <button type="button" class="btn btn-info" onclick=" window.location.assign('/paseos/consultarReserva')">Gestiona aquí tu reserva</button>
+        </h2>
 
         <h1>Selecciona el paseo</h1>
         

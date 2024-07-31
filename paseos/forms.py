@@ -51,6 +51,17 @@ class CuentaBancariaForm(forms.ModelForm):
     class Meta:
         model = CuentaBancaria
         fields = ['numCuenta', 'tipoCuente', 'entidadBancaria']
+        labels = {
+            'numCuenta': 'Número de cuenta',
+            'tipoCuente': 'Tipo de cuenta',
+            'entidadBancaria': 'Entidad bancaria',
+        }
+        widgets = {
+            'tipoCuente': forms.Select(choices=CuentaBancaria.TIPO_CUENTA_CHOICES),
+            'entidadBancaria': forms.TextInput(attrs={
+                'onkeypress': 'return (event.charCode > 64 && event.charCode < 91) || (event.charCode > 96 && event.charCode < 123) || event.charCode == 32'
+            }),
+        }
 
 class ClienteForm(forms.ModelForm):
     class Meta:

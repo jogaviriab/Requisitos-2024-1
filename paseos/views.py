@@ -1,5 +1,7 @@
+
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
 from paseos.backends import AdminAuthentication
 from django.template import loader
 from django.core.exceptions import ObjectDoesNotExist
@@ -9,6 +11,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
 from email.mime.image import MIMEImage
 from django.utils.timezone import now
+from django.utils.safestring import mark_safe
+
 
 from datetime import datetime, timedelta
 
@@ -110,7 +114,7 @@ def reservarPaseo(request, paseo_id):
 
     if request.method == 'POST' and 'buscar_cliente' in request.POST:
         cliente_id = request.POST.get('cliente_id')
-        if cliente_id:
+        if cliente_id and cliente_id != 'None':
             try:
                 cliente = Cliente.objects.get(id=cliente_id)
                 cliente_form = ClienteForm(instance=cliente)
@@ -124,83 +128,105 @@ def reservarPaseo(request, paseo_id):
         reserva_form = ReservaForm()
     elif request.method == 'POST':
         cliente_id = request.POST.get('cliente_id')
-        if cliente_id:
+        if cliente_id and cliente_id != 'None':
             try:
                 cliente = Cliente.objects.get(id=cliente_id)
                 cliente_form = ClienteForm(request.POST, instance=cliente)
                 cuenta_bancaria_form = CuentaBancariaForm(request.POST, instance=cliente.cuentaBancaria)
             except Cliente.DoesNotExist:
+                # Si el cliente no existe, crear un nuevo formulario para crear un nuevo cliente
                 cliente_form = ClienteForm(request.POST)
                 cuenta_bancaria_form = CuentaBancariaForm(request.POST)
         else:
+            # Si no se proporcionó un ID de cliente, crear un nuevo formulario para crear un nuevo cliente
             cliente_form = ClienteForm(request.POST)
             cuenta_bancaria_form = CuentaBancariaForm(request.POST)
 
         reserva_form = ReservaForm(request.POST)
 
         if cliente_form.is_valid() and cuenta_bancaria_form.is_valid() and reserva_form.is_valid():
-            cuenta_bancaria = cuenta_bancaria_form.save()
-            cliente = cliente_form.save(commit=False)
-            cliente.cuentaBancaria = cuenta_bancaria
-            cliente.save()
-
-            reserva = reserva_form.save(commit=False)
-            reserva.paseo = paseo
-            reserva.estado = 'pendientePago'
-            reserva.fechaCreacion = timezone.now().date()
-            reserva.valor = paseo.esquemaCobro.valor
-
-            # Asignar paquete si se seleccionó, sino None
-            paquete_id = request.POST.get('paquete')
-            if paquete_id:
-                paquete = get_object_or_404(Paquete, id=paquete_id)
-                reserva.paquete = paquete
+            # Si el formulario de cliente es válido, crear un nuevo cliente
+            if not cliente_id or not cliente:
+                cliente = cliente_form.save(commit=False)
+                cuenta_bancaria = cuenta_bancaria_form.save()
+                cliente.cuentaBancaria = cuenta_bancaria
+                cliente.save()
             else:
-                paquete_default = Paquete.objects.get(id=1)
-                reserva.paquete = paquete_default
-            
-            # Asignar comprobante de pago como cadena vacía por defecto
-            #reserva.comprobantePago = 'Comprobante pendiente'
+                # Actualizar el cliente existente
+                cliente_form.save()
+                cuenta_bancaria_form.save()
 
-            reserva.persona = cliente
-            reserva.save()
+            # Verificar si el cliente ya tiene una reserva para este paseo
+            if Reserva.objects.filter(persona=cliente, paseo=paseo).exists():
+                error_message = "Este cliente ya tiene una reserva para este paseo. No se puede crear una reserva duplicada."
+            elif paseo.disponibilidad <= 0:
+                error_message = "No hay disponibilidad para este paseo. Por favor, seleccione otro paseo o fecha."
+            else:
+                # Validar la edad del cliente para chiva rumbera
+                if paseo.chiva.tipo == 'Rumbera' and cliente.edad < 18:
+                    error_message = "Debe tener al menos 18 años para reservar un paseo en una chiva rumbera."
+                if cliente.edad > 110:
+                    error_message = "Rango de edad no válido."
 
-            paseo.save()
+                else:
+                    reserva = reserva_form.save(commit=False)
+                    reserva.paseo = paseo
+                    reserva.estado = 'pendientePago'
+                    reserva.fechaCreacion = timezone.now().date()
+                    reserva.valor = paseo.esquemaCobro.valor
 
-            subject = 'Reserva confirmada'
-            text_content = f'Estimado/a {reserva.persona.nombre},\n\n'
-            text_content += f'Su reserva del paseo para el {reserva.paseo.fecha} ha sido confirmada.\n'
+                    # Asignar paquete si se seleccionó, sino None
+                    paquete_id = request.POST.get('paquete')
+                    if paquete_id:
+                        paquete = get_object_or_404(Paquete, id=paquete_id)
+                        reserva.paquete = paquete
+                    else:
+                        paquete_default = Paquete.objects.get(id=1)
+                        reserva.paquete = paquete_default
 
-            html_content = '<p>Estimado/a <strong>{}</strong>,</p>'.format(reserva.persona.nombre)
-            html_content += '<p>Su reserva de paseo para el {} ha sido confirmada.</p>'.format(reserva.paseo.fecha)
-            html_content += '<p>Detalles de la reserva:</p>'
-            html_content += '<ul>'
-            html_content += '<li>ID reserva: {}</li>'.format(reserva.id)
-            html_content += '<li>Paseo: {} - {}</li>'.format(reserva.paseo.origen, reserva.paseo.destino)            
-            html_content += '<li>Valor: {}</li>'.format(reserva.valor)
-            html_content += '<li>Cuenta registrada: {} {}</li>'.format(reserva.persona.cuentaBancaria.entidadBancaria, reserva.persona.cuentaBancaria.tipoCuente)
-            html_content += '<li>Número de cuenta: {}</li>'.format(reserva.persona.cuentaBancaria.numCuenta)
-            html_content += '<li>Paquete: {}</li>'.format(reserva.paquete.nombre)
-            html_content += '<li>Fecha: {}</li>'.format(reserva.paseo.fecha)
-            html_content += '<li>Hora: {}</li>'.format(reserva.paseo.hora)
-            html_content += '<li>Chiva: {}</li>'.format(reserva.paseo.chiva.tipo)
-            html_content += '<li>Estado de chiva/paseo: {}</li>'.format(reserva.paseo.chiva.estado)
-            html_content += '<li>Estado de reserva: {}</li>'.format(reserva.estado)
-            html_content += '</ul>'
-            html_content += '<p>Puede ver los detalles de su reserva en "Gestiona aquí tu reserva", ingresando el ID de su reserva.</p>\n\n'                  
-            html_content += '<p>Por favor recuerde leer los términos y condiciones.</p>\n\n'    #TERMINOS Y CONDICIONES PAGNA        
-            html_content += '<p>Atentamente, Chivas Travel.</p>'
+                    reserva.persona = cliente
+                    reserva.save()
 
-            msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [reserva.persona.correo])
-            msg.attach_alternative(html_content, "text/html")
-            msg.send()
+                    paseo.save()
 
-            messages.success(request, f'Su reserva con ID número: {reserva.id} se ha creado con éxito. \n Adicionalmente, se le ha enviado un correo electrónico con la información de la reserva.')
-        else:
-            error_message = "Por favor, ingrese todos los datos requeridos correctamente."
-            error_cliente = cliente_form.errors
-            error_cuenta_bancaria = cuenta_bancaria_form.errors
-            error_reserva = reserva_form.errors
+                    subject = 'Reserva confirmada'
+                    text_content = f'Estimado/a {reserva.persona.nombre},\n\n'
+                    text_content += f'Su reserva del paseo para el {reserva.paseo.fecha} ha sido confirmada.\n'
+
+                    html_content = '<p>Estimado/a <strong>{}</strong>,</p>'.format(reserva.persona.nombre)
+                    html_content += '<p>Su reserva de paseo para el {} ha sido confirmada.</p>'.format(reserva.paseo.fecha)
+                    html_content += '<p>Detalles de la reserva:</p>'
+                    html_content += '<ul>'
+                    html_content += '<li>ID reserva: {}</li>'.format(reserva.id)
+                    html_content += '<li>Paseo: {} - {}</li>'.format(reserva.paseo.origen, reserva.paseo.destino)            
+                    html_content += '<li>Valor: {}</li>'.format(reserva.valor)
+                    html_content += '<li>Cuenta registrada: {} {}</li>'.format(reserva.persona.cuentaBancaria.entidadBancaria, reserva.persona.cuentaBancaria.tipoCuente)
+                    html_content += '<li>Número de cuenta: {}</li>'.format(reserva.persona.cuentaBancaria.numCuenta)
+                    html_content += '<li>Paquete: {}</li>'.format(reserva.paquete.nombre)
+                    html_content += '<li>Fecha: {}</li>'.format(reserva.paseo.fecha)
+                    html_content += '<li>Hora: {}</li>'.format(reserva.paseo.hora)
+                    html_content += '<li>Chiva: {}</li>'.format(reserva.paseo.chiva.tipo)
+                    html_content += '<li>Estado de chiva/paseo: {}</li>'.format(reserva.paseo.chiva.estado)
+                    html_content += '<li>Estado de reserva: {}</li>'.format(reserva.estado)
+                    html_content += '</ul>'
+                    html_content += '<p>Puede ver los detalles de su reserva en "Gestiona aquí tu reserva", ingresando el ID de su reserva.</p>\n\n'                  
+                    html_content += '<p>Por favor recuerde leer los términos y condiciones.</p>\n\n'    #TERMINOS Y CONDICIONES PAGNA        
+                    html_content += '<p>Atentamente, Chivas Travel.</p>'
+
+                    msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [reserva.persona.correo])
+                    msg.attach_alternative(html_content, "text/html")
+                    msg.send()
+                    
+                    messages.success(
+                    request,
+                    mark_safe(
+                        f'Su reserva con ID número: {reserva.id} se ha creado con éxito. '
+                        f'Adicionalmente, se le ha enviado un correo electrónico con la información de la reserva. '
+                        f'<a href="{reverse("pagarReserva", args=[reserva.id])}">Pagar ahora</a>'
+                    )
+                )
+
+
     else:
         cliente_form = None
         cuenta_bancaria_form = None
@@ -220,11 +246,30 @@ def reservarPaseo(request, paseo_id):
         'paquetes': paquetes
     })
 
+
 def crearReserva(request):
     tipo_chiva = request.GET.get('tipo_chiva')
-    paseos_rumbera = Paseo.objects.filter(chiva__tipo='Rumbera', disponibilidad__gt=0) if tipo_chiva == 'rumbera' else []
-    paseos_normal = Paseo.objects.filter(chiva__tipo='Normal', disponibilidad__gt=0) if tipo_chiva == 'normal' else []
-    error_message = None
+    current_date = timezone.now().date()
+    
+    # Filtro de paseos para chivas rumberas
+    if tipo_chiva == 'rumbera':
+        paseos_rumbera = Paseo.objects.filter(
+            chiva__tipo='Rumbera',
+            disponibilidad__gt=0,  # Paseos con disponibilidad mayor a 0
+            fecha__gte=current_date  # Paseos con fecha igual o mayor a la fecha actual
+        )
+    else:
+        paseos_rumbera = []
+
+    # Filtro de paseos para chivas normales
+    if tipo_chiva == 'normal':
+        paseos_normal = Paseo.objects.filter(
+            chiva__tipo='Normal',
+            disponibilidad__gt=0,  # Paseos con disponibilidad mayor a 0
+            fecha__gte=current_date  # Paseos con fecha igual o mayor a la fecha actual
+        )
+    else:
+        paseos_normal = []
 
     no_paseos_rumbera = not paseos_rumbera and tipo_chiva == 'rumbera'
     no_paseos_normal = not paseos_normal and tipo_chiva == 'normal'
@@ -234,9 +279,7 @@ def crearReserva(request):
         'paseos_normal': paseos_normal,
         'no_paseos_rumbera': no_paseos_rumbera,
         'no_paseos_normal': no_paseos_normal,
-        'error_message': error_message,
     })
-
 
 def consultarReserva(request):
 

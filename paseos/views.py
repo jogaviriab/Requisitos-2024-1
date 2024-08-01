@@ -165,7 +165,7 @@ def reservarPaseo(request, paseo_id):
                 # Validar la edad del cliente para chiva rumbera
                 if paseo.chiva.tipo == 'Rumbera' and cliente.edad < 18:
                     error_message = "Debe tener al menos 18 años para reservar un paseo en una chiva rumbera."
-                if cliente.edad > 110:
+                if cliente.edad > 110 or cliente.edad < 7:
                     error_message = "Rango de edad no válido."
 
                 else:
@@ -173,7 +173,7 @@ def reservarPaseo(request, paseo_id):
                     reserva.paseo = paseo
                     reserva.estado = 'pendientePago'
                     reserva.fechaCreacion = timezone.now().date()
-                    reserva.valor = paseo.esquemaCobro.valor
+                    
 
                     # Asignar paquete si se seleccionó, sino None
                     paquete_id = request.POST.get('paquete')
@@ -181,9 +181,10 @@ def reservarPaseo(request, paseo_id):
                         paquete = get_object_or_404(Paquete, id=paquete_id)
                         reserva.paquete = paquete
                     else:
-                        paquete_default = Paquete.objects.get(id=1)
+                        paquete_default = Paquete.objects.get(id=4)
                         reserva.paquete = paquete_default
 
+                    reserva.valor = paseo.esquemaCobro.valor + reserva.paquete.valor
                     reserva.persona = cliente
                     reserva.save()
 

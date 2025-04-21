@@ -2,6 +2,34 @@
 Este proyecto es una página web diseñada para la gestión de paseos en chiva. El sistema gestiona dos tipos de usuarios: administrador y cliente.
 El administrador tiene la capacidad de organizar la programación de los paseos, incluyendo la gestión de fechas, rutas y disponibilidad. Por su parte, el cliente puede acceder a los paseos disponibles y realizar reservas.
 
+## Tecnologías utilizadas:
+- Django
+- Python
+- Html5
+- Javascript
+- Bootstrap
+- CSS
+- Sqlite3
+
+## Requisitos
+- Django instalado
+  
+## Ejecución del proyecto
+```sh
+npm install
+py manage.py runserver
+```
+# Rutas - URLs
+Para ingresar a la interfaz principal del administrador:
+- `/paseos/verPaseosAdmin/`
+Para ingresar a la interfaz principal del cliente:
+-`paseos/crearReserva/`
+
+## Inicio de Sesión como Administrador
+Para acceder con privilegios de administrador, puedes usar las siguientes credenciales:
+- **Correo:** `ange@gmail.com`
+- **Contraseña:** `123`
+  
 ## Funcionalidades
 - Gestión de reservas
 - Gestión de paseos

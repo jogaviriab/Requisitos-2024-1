@@ -19,7 +19,7 @@ El administrador tiene la capacidad de organizar la programación de los paseos,
 npm install
 py manage.py runserver
 ```
-# Rutas - URLs
+## Rutas - URLs
 Para ingresar a la interfaz principal del administrador:
 - `/paseos/verPaseosAdmin/`
 Para ingresar a la interfaz principal del cliente:

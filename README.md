@@ -2,6 +2,13 @@
 Este proyecto es una página web diseñada para la gestión de paseos en chiva. El sistema gestiona dos tipos de usuarios: administrador y cliente.
 El administrador tiene la capacidad de organizar la programación de los paseos, incluyendo la gestión de fechas, rutas y disponibilidad. Por su parte, el cliente puede acceder a los paseos disponibles y realizar reservas.
 
+## Funcionalidades
+- Gestión de reservas
+- Gestión de paseos
+- Gestión de desembolsos
+- Gestión de Chivas
+- Gestión de paquetes
+
 ## Tecnologías utilizadas
 - Django
 - Python
@@ -30,12 +37,7 @@ Para acceder con privilegios de administrador, puedes usar las siguientes creden
 - **Correo:** `ange@gmail.com`
 - **Contraseña:** `123`
   
-## Funcionalidades
-- Gestión de reservas
-- Gestión de paseos
-- Gestión de desembolsos
-- Gestión de Chivas
-- Gestión de paquetes
+## Imágenes de muestra de algunas funcionalidades
 
 A continuación se presentan algunas imágenes del proyecto
 ![WhatsApp Image 2025-04-20 at 22 14 01_7a7b1b7f](https://github.com/user-attachments/assets/6e026d58-e18f-4eba-8926-047523aa8a55)
